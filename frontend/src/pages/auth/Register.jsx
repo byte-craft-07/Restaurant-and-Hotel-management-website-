@@ -1,0 +1,288 @@
+import { useState } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  Lock,
+  Mail,
+  Phone,
+  Sparkles,
+  User,
+} from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import BrandLogo from "../../components/BrandLogo";
+import FloatingFoodScene from "../../components/FloatingFoodScene";
+import { FieldError } from "../../components/form/PremiumFields";
+import { getCustomerRedirect } from "../../utils/authRedirect";
+
+const Register = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+
+  const [error, setError] = useState("");
+  const [formErrors, setFormErrors] = useState({});
+
+  const { register } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const redirect = searchParams.get("redirect") || "/menu";
+  const qrToken = searchParams.get("qrToken");
+  const customerRedirect = getCustomerRedirect(redirect);
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+    setFormErrors((prev) => ({ ...prev, [e.target.name]: "" }));
+  };
+
+  const validateForm = () => {
+    const errors = {};
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!formData.name.trim()) errors.name = "Full name is required.";
+    if (!formData.email.trim()) {
+      errors.email = "Email is required.";
+    } else if (!emailPattern.test(formData.email)) {
+      errors.email = "Enter a valid email address.";
+    }
+    if (!formData.phone.trim()) errors.phone = "Phone number is required.";
+    if (!formData.password) {
+      errors.password = "Password is required.";
+    } else if (formData.password.length < 6) {
+      errors.password = "Password must be at least 6 characters.";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setError("");
+
+    try {
+      await register(formData);
+
+      if (qrToken) {
+        localStorage.setItem("qrToken", qrToken);
+      }
+
+      navigate(customerRedirect);
+    } catch (err) {
+      setError(err.response?.data?.message || "Registration failed");
+    }
+  };
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-[#f8f6f2] text-slate-900">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,#fb923c_0,transparent_28%),radial-gradient(circle_at_bottom_right,#fcd34d_0,transparent_30%)] opacity-20" />
+      <div className="absolute left-10 top-20 h-72 w-72 rounded-full bg-orange-300/30 blur-3xl" />
+      <div className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-yellow-300/30 blur-3xl" />
+
+      <div className="relative z-10 grid min-h-screen lg:grid-cols-2">
+        <section className="hidden min-h-screen flex-col gap-7 overflow-hidden p-8 xl:p-10 lg:flex">
+          <Link to="/">
+            <BrandLogo subtitle="Smart Hospitality OS" />
+          </Link>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-xl"
+          >
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/70 px-4 py-2 shadow-sm">
+              <Sparkles size={18} className="text-orange-500" />
+              <span className="text-sm font-semibold">Join Smart Dining</span>
+            </div>
+
+            <h1 className="text-5xl font-black leading-tight xl:text-6xl">
+              Create your account and start{" "}
+              <span className="text-orange-500">ordering smarter.</span>
+            </h1>
+
+            <p className="mt-6 text-lg text-slate-600">
+              Scan QR, verify your table, place orders, track history and unlock
+              personalized offers as a regular customer.
+            </p>
+
+            <div className="mt-8 grid grid-cols-3 gap-4">
+              <div className="rounded-3xl border border-white/80 bg-white/70 p-4 shadow-lg xl:p-5">
+                <p className="text-3xl font-black text-orange-500">ID</p>
+                <p className="mt-1 text-sm text-slate-500">Customer profile</p>
+              </div>
+
+              <div className="rounded-3xl border border-white/80 bg-white/70 p-4 shadow-lg xl:p-5">
+                <p className="text-3xl font-black text-green-600">Rs.</p>
+                <p className="mt-1 text-sm text-slate-500">Offers</p>
+              </div>
+
+              <div className="rounded-3xl border border-white/80 bg-white/70 p-4 shadow-lg xl:p-5">
+                <p className="text-3xl font-black text-purple-600">QR</p>
+                <p className="mt-1 text-sm text-slate-500">Fast ordering</p>
+              </div>
+            </div>
+          </motion.div>
+
+          <div className="max-h-[300px] overflow-hidden rounded-[2rem] border border-white/70 bg-white/60 shadow-2xl backdrop-blur-2xl xl:max-h-[340px]">
+            <FloatingFoodScene className="h-[300px] w-full xl:h-[340px]" />
+          </div>
+        </section>
+
+        <section className="flex items-center justify-center px-5 py-10">
+          <motion.div
+            data-premium-hover="true"
+            initial={{ opacity: 0, y: 35, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.55 }}
+            className="w-full max-w-md rounded-[2rem] border border-white/80 bg-white/75 p-8 shadow-2xl backdrop-blur-2xl"
+          >
+            <div className="mb-8">
+              <BrandLogo
+                className="mb-6"
+                size="md"
+                subtitle="Customer Ordering"
+              />
+
+              <h2 className="text-3xl font-black">Create Account</h2>
+              <p className="mt-2 text-slate-500">
+                Register to continue your dining experience.
+              </p>
+            </div>
+
+            {error && (
+              <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+                {error}
+              </div>
+            )}
+
+            {qrToken && (
+              <div className="mb-5 rounded-2xl border border-orange-200 bg-orange-50 p-3 text-sm font-semibold text-orange-700">
+                Table QR detected. Create a customer account to save order
+                history and offers.
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} noValidate className="space-y-4">
+              <div>
+                <div className="relative">
+                  <User
+                    size={20}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    name="name"
+                    placeholder="Full Name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className={`w-full rounded-2xl border bg-white py-4 pl-12 pr-4 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 ${
+                      formErrors.name
+                        ? "border-red-200 bg-red-50/60"
+                        : "border-slate-200"
+                    }`}
+                    aria-invalid={Boolean(formErrors.name)}
+                  />
+                </div>
+                <FieldError>{formErrors.name}</FieldError>
+              </div>
+
+              <div>
+                <div className="relative">
+                  <Mail
+                    size={20}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    name="email"
+                    placeholder="Email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={`w-full rounded-2xl border bg-white py-4 pl-12 pr-4 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 ${
+                      formErrors.email
+                        ? "border-red-200 bg-red-50/60"
+                        : "border-slate-200"
+                    }`}
+                    aria-invalid={Boolean(formErrors.email)}
+                  />
+                </div>
+                <FieldError>{formErrors.email}</FieldError>
+              </div>
+
+              <div>
+                <div className="relative">
+                  <Phone
+                    size={20}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    name="phone"
+                    placeholder="Phone Number"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className={`w-full rounded-2xl border bg-white py-4 pl-12 pr-4 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 ${
+                      formErrors.phone
+                        ? "border-red-200 bg-red-50/60"
+                        : "border-slate-200"
+                    }`}
+                    aria-invalid={Boolean(formErrors.phone)}
+                  />
+                </div>
+                <FieldError>{formErrors.phone}</FieldError>
+              </div>
+
+              <div>
+                <div className="relative">
+                  <Lock
+                    size={20}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    name="password"
+                    type="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className={`w-full rounded-2xl border bg-white py-4 pl-12 pr-4 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100 ${
+                      formErrors.password
+                        ? "border-red-200 bg-red-50/60"
+                        : "border-slate-200"
+                    }`}
+                    aria-invalid={Boolean(formErrors.password)}
+                  />
+                </div>
+                <FieldError>{formErrors.password}</FieldError>
+              </div>
+
+              <button className="flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 p-4 font-bold text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-600">
+                Create Account
+                <ArrowRight size={20} />
+              </button>
+            </form>
+
+            <p className="mt-6 text-center text-sm text-slate-500">
+              Already have account?{" "}
+              <Link
+                to={`/login?redirect=${customerRedirect}${
+                  qrToken ? `&qrToken=${qrToken}` : ""
+                }`}
+                className="font-bold text-orange-500"
+              >
+                Login
+              </Link>
+            </p>
+          </motion.div>
+        </section>
+      </div>
+    </div>
+  );
+};
+
+export default Register;

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="10" y1="8" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fb923c"/>
+      <stop offset="0.55" stop-color="#f97316"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="s" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#f97316" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="#fff7ed"/>
+  <rect x="8" y="8" width="48" height="48" rx="16" fill="url(#g)" filter="url(#s)"/>
+  <path fill="#fff" d="M21 20h8v8h-8v-8Zm3 3v2h2v-2h-2Zm11-3h8v8h-8v-8Zm3 3v2h2v-2h-2ZM21 35h8v8h-8v-8Zm3 3v2h2v-2h-2Zm15-3h4v4h-4v-4Zm-5 0h3v3h-3v-3Zm0 5h3v3h-3v-3Zm5 3h4v-3h3v6h-7v-3Zm-17-9h4v-3h3v3h3v4h-4v-2h-6v-2Zm10-14h2v5h-2v-5Zm0 8h5v3h-5v-3Zm11 3h3v3h-3v-3Z"/>
+  <path fill="#fff7ed" d="M31.5 15.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v1h-3v-1Z"/>
+</svg>

@@ -1,0 +1,76 @@
+[data-premium-hover-target="true"] {
+  --premium-hover-x: 50%;
+  --premium-hover-y: 50%;
+  --premium-rotate-x: 0deg;
+  --premium-rotate-y: 0deg;
+  isolation: isolate;
+  position: relative;
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease;
+  will-change: transform;
+}
+
+[data-premium-hover-target="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(
+      circle at var(--premium-hover-x) var(--premium-hover-y),
+      rgba(251, 146, 60, 0.24),
+      rgba(253, 186, 116, 0.1) 34%,
+      transparent 62%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.28),
+      transparent 42%,
+      rgba(251, 146, 60, 0.08)
+    );
+  transition: opacity 220ms ease;
+}
+
+[data-premium-hover-target="true"][data-premium-active="true"]::after {
+  opacity: 1;
+}
+
+[data-premium-hover-target="true"][data-premium-kind="surface"][data-premium-active="true"] {
+  border-color: rgba(251, 146, 60, 0.34);
+  box-shadow:
+    0 28px 76px rgba(15, 23, 42, 0.12),
+    0 18px 44px rgba(249, 115, 22, 0.14);
+  transform:
+    perspective(1000px)
+    translateY(-7px)
+    rotateX(var(--premium-rotate-x))
+    rotateY(var(--premium-rotate-y));
+}
+
+[data-premium-hover-target="true"][data-premium-kind="button"][data-premium-active="true"] {
+  box-shadow:
+    0 18px 38px rgba(249, 115, 22, 0.28),
+    0 8px 24px rgba(15, 23, 42, 0.1);
+  transform: translateY(-3px) scale(1.015);
+}
+
+[data-premium-hover-target="true"][data-premium-kind="soft-button"][data-premium-active="true"] {
+  border-color: rgba(251, 146, 60, 0.42);
+  color: #ea580c;
+  box-shadow: 0 16px 34px rgba(249, 115, 22, 0.13);
+  transform: translateY(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-premium-hover-target="true"],
+  [data-premium-hover-target="true"][data-premium-kind="surface"][data-premium-active="true"],
+  [data-premium-hover-target="true"][data-premium-kind="button"][data-premium-active="true"],
+  [data-premium-hover-target="true"][data-premium-kind="soft-button"][data-premium-active="true"] {
+    transform: none;
+  }
+}
