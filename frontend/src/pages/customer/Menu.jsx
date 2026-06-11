@@ -9,6 +9,7 @@ import {
   Lightbulb,
   LogOut,
   MapPin,
+  PartyPopper,
   PlusCircle,
   ReceiptText,
   Search,
@@ -103,15 +104,15 @@ const Menu = () => {
 
     if (isDemoQrToken(qrToken)) {
       setTableContext({
-        type: "table",
-        number: "T1",
-        label: "Hackathon demo table",
+        type: "room",
+        number: "101",
+        label: "Demo guest room",
       });
       return;
     }
 
     try {
-      const res = await api.get(`/table-rooms/context/${qrToken}`);
+      const res = await api.get(`/rooms/context/${qrToken}`);
       setTableContext(res.data.tableRoom || null);
     } catch {
       setTableContext(null);
@@ -127,7 +128,7 @@ const Menu = () => {
     const qrToken = localStorage.getItem("qrToken");
 
     if (!qrToken) {
-      setServiceMessage("Please scan your table QR first.");
+      setServiceMessage("Please scan your room QR first.");
       return;
     }
 
@@ -141,10 +142,10 @@ const Menu = () => {
         note: "Guest requested service from the digital menu.",
       });
 
-      setServiceMessage("Waiter request sent. Staff will acknowledge shortly.");
+      setServiceMessage("Service request sent. Hotel staff will acknowledge shortly.");
     } catch (error) {
       setServiceMessage(
-        error.response?.data?.message || "Unable to send waiter request."
+        error.response?.data?.message || "Unable to send service request."
       );
     } finally {
       setServiceLoading(false);
@@ -292,7 +293,7 @@ const Menu = () => {
                   className="flex items-center gap-2 rounded-full border border-orange-100 bg-white/80 px-3 py-1 text-xs font-black uppercase tracking-wide text-orange-600 shadow-sm"
                 >
                   <MapPin size={14} />
-                  {tableContext.type} {tableContext.number}
+                  Room {tableContext.number}
                 </motion.div>
               )}
             </div>
@@ -302,7 +303,7 @@ const Menu = () => {
             </h1>
 
             <p className="text-sm text-slate-500">
-              Fresh menu, fast ordering, verified table service.
+              Fresh menu, fast ordering, verified room service.
             </p>
           </div>
 
@@ -332,6 +333,14 @@ const Menu = () => {
                 >
                   <ReceiptText size={18} />
                   My Orders
+                </Link>
+
+                <Link
+                  to="/events"
+                  className="flex items-center gap-2 rounded-2xl border border-white/80 bg-white/70 px-4 py-3 font-bold text-slate-700 shadow-sm transition hover:border-orange-200 hover:text-orange-500"
+                >
+                  <PartyPopper size={18} />
+                  Events
                 </Link>
               </>
             )}
@@ -369,7 +378,7 @@ const Menu = () => {
                 className="flex items-center gap-2 rounded-2xl border border-orange-100 bg-white/80 px-4 py-3 font-bold text-orange-600 shadow-sm transition hover:bg-orange-50 disabled:opacity-70"
               >
                 <BellRing size={18} />
-                {serviceLoading ? "Calling..." : "Call Waiter"}
+                {serviceLoading ? "Calling..." : "Call Service"}
               </motion.button>
             )}
 

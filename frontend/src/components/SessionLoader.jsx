@@ -18,7 +18,7 @@ const SessionLoader = () => {
         </motion.div>
 
         <h2 className="text-2xl font-black text-slate-900">
-          Preparing your table...
+          Preparing your room...
         </h2>
 
         <p className="text-slate-500 mt-2">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Activity,
@@ -6,6 +7,7 @@ import {
   Clock,
   CookingPot,
   Flame,
+  Home,
   IndianRupee,
   ReceiptText,
   Sparkles,
@@ -132,6 +134,8 @@ const KitchenDashboard = () => {
     fetchOrders();
 
     socket.on("new_order", (order) => {
+      if (!activeStatuses.includes(order.status)) return;
+
       setAllOrders((prev) => {
         const next = [order, ...prev.filter((item) => item._id !== order._id)];
         setStats(buildStats(next));
@@ -159,11 +163,15 @@ const KitchenDashboard = () => {
       });
 
       setOrders((prev) => {
-        if (
-          updatedOrder.status === "served" ||
-          updatedOrder.status === "cancelled"
-        ) {
+        if (!activeStatuses.includes(updatedOrder.status)) {
           return prev.filter((order) => order._id !== updatedOrder._id);
+        }
+
+        const hasOrder = prev.some((order) => order._id === updatedOrder._id);
+
+        if (!hasOrder) {
+          setHighlightedOrderId(updatedOrder._id);
+          return [updatedOrder, ...prev];
         }
 
         return prev.map((order) =>
@@ -307,23 +315,32 @@ const KitchenDashboard = () => {
   return (
     <div className="premium-page p-5 md:p-8">
       <div className="relative z-10">
-        <div className="mb-8">
-          <div className="premium-label-pill mb-4">
-            <Sparkles size={18} />
-            {demoMode ? "Kitchen Display - Demo Activity" : "Kitchen Display"}
-          </div>
-          <h1 className="text-4xl font-black text-slate-950">
-            Kitchen Display System
-          </h1>
-          <p className="mt-2 text-slate-500">
-            Live kitchen order queue for food preparation.
-          </p>
-          {demoMode && (
-            <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-100 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700">
-              <Activity size={16} />
-              Story mode is keeping this screen alive until real orders arrive.
+        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="premium-label-pill mb-4">
+              <Sparkles size={18} />
+              {demoMode ? "Kitchen Display - Demo Activity" : "Kitchen Display"}
+            </div>
+            <h1 className="text-4xl font-black text-slate-950">
+              Kitchen Display System
+            </h1>
+            <p className="mt-2 text-slate-500">
+              Live kitchen order queue for food preparation.
             </p>
-          )}
+            {demoMode && (
+              <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-100 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700">
+                <Activity size={16} />
+                Story mode is keeping this screen alive until real orders arrive.
+              </p>
+            )}
+          </div>
+          <Link
+            to="/"
+            className="inline-flex w-fit items-center gap-2 rounded-2xl border border-orange-100 bg-white/85 px-5 py-3 font-black text-orange-600 shadow-lg shadow-orange-100/60 transition hover:border-orange-200 hover:bg-orange-50"
+          >
+            <Home size={18} />
+            Home Page
+          </Link>
         </div>
 
         <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -385,8 +402,7 @@ const KitchenDashboard = () => {
                       <div className="mb-4 flex justify-between gap-3">
                         <div>
                           <h3 className="text-2xl font-black text-orange-500">
-                            {order.tableRoom?.type?.toUpperCase()}{" "}
-                            {order.tableRoom?.number}
+                            Room {order.tableRoom?.number}
                           </h3>
 
                           <p className="mt-1 text-sm text-slate-500">
@@ -434,7 +450,7 @@ const KitchenDashboard = () => {
                             onClick={() =>
                               updateStatus(order._id, "accepted")
                             }
-                            aria-label={`Accept order for ${order.tableRoom?.type || "table"} ${order.tableRoom?.number || ""}`}
+                            aria-label={`Accept order for room ${order.tableRoom?.number || ""}`}
                             className="rounded-2xl bg-blue-500 px-4 py-3 font-bold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-600"
                           >
                             Accept
@@ -446,7 +462,7 @@ const KitchenDashboard = () => {
                             onClick={() =>
                               updateStatus(order._id, "preparing")
                             }
-                            aria-label={`Start preparing order for ${order.tableRoom?.type || "table"} ${order.tableRoom?.number || ""}`}
+                            aria-label={`Start preparing order for room ${order.tableRoom?.number || ""}`}
                             className="rounded-2xl bg-yellow-500 px-4 py-3 font-bold text-white shadow-lg shadow-yellow-500/20 hover:bg-yellow-600"
                           >
                             Start Preparing
@@ -455,7 +471,7 @@ const KitchenDashboard = () => {
 
                         <button
                           onClick={() => updateStatus(order._id, "served")}
-                          aria-label={`Mark order ready for ${order.tableRoom?.type || "table"} ${order.tableRoom?.number || ""}`}
+                          aria-label={`Mark order ready for room ${order.tableRoom?.number || ""}`}
                           className="rounded-2xl bg-green-500 px-4 py-3 font-bold text-white shadow-lg shadow-green-500/20 hover:bg-green-600"
                         >
                           Mark Ready/Served

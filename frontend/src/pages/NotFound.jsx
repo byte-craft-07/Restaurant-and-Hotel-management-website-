@@ -25,7 +25,7 @@ const NotFound = () => {
 
         <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-100 text-orange-600 px-4 py-2 rounded-full font-bold mb-5">
           <SearchX size={18} />
-          Table not found
+          Room not found
         </div>
 
         <h1 className="text-6xl md:text-8xl font-black text-orange-500">
@@ -33,11 +33,11 @@ const NotFound = () => {
         </h1>
 
         <h2 className="text-3xl md:text-4xl font-black mt-3">
-          This table is not on today’s menu.
+          This room-service page is not available.
         </h2>
 
         <p className="text-slate-500 mt-4 max-w-lg mx-auto">
-          The page, table, room, order, or item you are looking for may have
+          The page, room, order, or item you are looking for may have
           been moved, deleted, expired, or served already.
         </p>
 

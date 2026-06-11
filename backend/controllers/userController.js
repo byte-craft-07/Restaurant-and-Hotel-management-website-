@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const User = require("../models/user");
 const Order = require("../models/Order");
 
 const generateCustomerId = async () => {
@@ -133,7 +133,7 @@ const createStaffUser = async (req, res) => {
     if (!["waiter", "kitchen"].includes(role)) {
       return res.status(400).json({
         success: false,
-        message: "Only waiter or kitchen staff can be created here",
+        message: "Only room-service or kitchen staff can be created here",
       });
     }
 
@@ -162,7 +162,7 @@ const createStaffUser = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: `${role === "waiter" ? "Waiter" : "Kitchen"} account created`,
+      message: `${role === "waiter" ? "Service staff" : "Kitchen"} account created`,
       staff: safeStaffUser,
     });
   } catch (error) {

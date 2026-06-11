@@ -1,14 +1,14 @@
 import { motion } from "framer-motion";
 import { Clock3, MapPin, Sparkles } from "lucide-react";
 import {
-  RESTAURANT_BRAND,
+  HOTEL_BRAND,
   getBrandCssVars,
-  getTableDisplay,
+  getRoomDisplay,
   statusStyles,
 } from "../../services/restaurantBranding";
 
 const RestaurantBrandPanel = ({
-  brand = RESTAURANT_BRAND,
+  brand = HOTEL_BRAND,
   tableContext,
   compact = false,
 }) => {
@@ -32,7 +32,7 @@ const RestaurantBrandPanel = ({
           <motion.div
             animate={{ y: [0, -4, 0], rotate: [0, 2, -2, 0] }}
             transition={{ duration: 4, repeat: Infinity }}
-            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.4rem] bg-[var(--restaurant-accent)] text-xl font-black text-white shadow-lg shadow-orange-500/25"
+            className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[1.4rem] bg-[var(--hotel-accent)] text-xl font-black text-white shadow-lg shadow-orange-500/25"
           >
             {brand.logoText}
           </motion.div>
@@ -71,7 +71,7 @@ const RestaurantBrandPanel = ({
         <div className="grid gap-2 text-sm sm:min-w-56">
           <div className="flex items-center gap-2 rounded-2xl border border-white/80 bg-white/80 px-4 py-3 font-black text-slate-800 shadow-sm">
             <MapPin size={17} className="text-orange-500" />
-            {getTableDisplay(tableContext)}
+            {getRoomDisplay(tableContext)}
           </div>
           <div className="flex items-center gap-2 rounded-2xl border border-white/80 bg-white/80 px-4 py-3 font-bold text-slate-600 shadow-sm">
             {brand.status === "Busy" ? (

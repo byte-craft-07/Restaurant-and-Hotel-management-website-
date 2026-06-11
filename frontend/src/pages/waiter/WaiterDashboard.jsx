@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   BellRing,
   CheckCircle,
+  Home,
   ReceiptText,
-  ShieldCheck,
   Sparkles,
   XCircle,
 } from "lucide-react";
@@ -13,17 +14,11 @@ import api from "../../services/api";
 
 const WaiterDashboard = () => {
   const [orders, setOrders] = useState([]);
-  const [pendingSessions, setPendingSessions] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
 
   const fetchOrders = async () => {
     const res = await api.get("/orders");
     setOrders(res.data.orders || []);
-  };
-
-  const fetchPendingSessions = async () => {
-    const res = await api.get("/table-rooms/verification/pending");
-    setPendingSessions(res.data.sessions || []);
   };
 
   const fetchServiceRequests = async () => {
@@ -60,29 +55,10 @@ const WaiterDashboard = () => {
 
   useEffect(() => {
     fetchOrders();
-    fetchPendingSessions();
     fetchServiceRequests();
 
     socket.on("new_order", (order) => {
       setOrders((prev) => [order, ...prev]);
-      if (order.session) {
-        setPendingSessions((prev) =>
-          prev.filter((session) => session._id !== order.session)
-        );
-      }
-    });
-
-    socket.on("verification_code_created", (session) => {
-      setPendingSessions((prev) => [
-        session,
-        ...prev.filter((item) => item._id !== session._id),
-      ]);
-    });
-
-    socket.on("verification_session_verified", (sessionId) => {
-      setPendingSessions((prev) =>
-        prev.filter((session) => session._id !== sessionId)
-      );
     });
 
     socket.on("order_status_updated", (updatedOrder) => {
@@ -117,8 +93,6 @@ const WaiterDashboard = () => {
 
     return () => {
       socket.off("new_order");
-      socket.off("verification_code_created");
-      socket.off("verification_session_verified");
       socket.off("order_status_updated");
       socket.off("service_request_created");
       socket.off("service_request_updated");
@@ -134,69 +108,27 @@ const WaiterDashboard = () => {
   return (
     <div className="premium-page p-5 md:p-8">
       <div className="relative z-10">
-        <div className="mb-8">
-          <div className="premium-label-pill mb-4">
-            <Sparkles size={18} />
-            Live Service Desk
-          </div>
-          <h1 className="text-4xl font-black text-slate-950">
-            Waiter Dashboard
-          </h1>
-          <p className="mt-2 text-slate-500">
-            Live table verification and order service operations.
-          </p>
-        </div>
-
-        <section className="premium-card mb-8 p-6">
-          <div className="mb-5 flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-black text-slate-950">
-                Verification Codes
-              </h2>
-              <p className="text-sm text-slate-500">
-                Share the visible code after confirming the table request.
-              </p>
+        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="premium-label-pill mb-4">
+              <Sparkles size={18} />
+              Live Service Desk
             </div>
-
-            <div className="rounded-2xl bg-orange-50 p-3 text-orange-500">
-              <ShieldCheck />
-            </div>
-          </div>
-
-          {pendingSessions.length === 0 ? (
-            <p className="rounded-[2rem] bg-[#f8f6f2] p-8 text-center text-slate-500">
-              No pending codes.
+            <h1 className="text-4xl font-black text-slate-950">
+              Service Staff Dashboard
+            </h1>
+            <p className="mt-2 text-slate-500">
+              Live room orders and hotel service operations.
             </p>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {pendingSessions.map((session) => (
-                <motion.div
-                  key={session._id}
-                  whileHover={{ y: -5, scale: 1.01 }}
-                  className="rounded-[2rem] border border-orange-100 bg-[#f8f6f2] p-5"
-                >
-                  <p className="font-black text-orange-500">
-                    {session.tableRoom?.type?.toUpperCase()}{" "}
-                    {session.tableRoom?.number}
-                  </p>
-
-                  <p className="text-sm text-slate-500">
-                    {session.customer?.name || "Customer"} |{" "}
-                    {session.customer?.phone || "No phone"}
-                  </p>
-
-                  <p className="mt-4 text-5xl font-black tracking-widest text-slate-950">
-                    {session.verificationCode}
-                  </p>
-
-                  <p className="mt-2 text-xs text-slate-500">
-                    Give this code to customer.
-                  </p>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </section>
+          </div>
+          <Link
+            to="/"
+            className="inline-flex w-fit items-center gap-2 rounded-2xl border border-orange-100 bg-white/85 px-5 py-3 font-black text-orange-600 shadow-lg shadow-orange-100/60 transition hover:border-orange-200 hover:bg-orange-50"
+          >
+            <Home size={18} />
+            Home Page
+          </Link>
+        </div>
 
         <section className="premium-card mb-8 p-6">
           <div className="mb-5 flex items-center justify-between">
@@ -205,7 +137,7 @@ const WaiterDashboard = () => {
                 Service Requests
               </h2>
               <p className="text-sm text-slate-500">
-                Guest calls from tables and rooms.
+                Guest calls from hotel rooms.
               </p>
             </div>
 
@@ -229,8 +161,7 @@ const WaiterDashboard = () => {
                   <div className="flex justify-between gap-3">
                     <div>
                       <p className="font-black text-amber-600">
-                        {request.tableRoom?.type?.toUpperCase()}{" "}
-                        {request.tableRoom?.number}
+                        Room {request.tableRoom?.number}
                       </p>
                       <p className="text-sm text-slate-500">
                         {request.customer?.name || "Guest"} |{" "}
@@ -244,7 +175,7 @@ const WaiterDashboard = () => {
                   </div>
 
                   <p className="mt-4 rounded-2xl bg-white p-3 text-sm font-semibold text-slate-700">
-                    {request.note || "Guest requested waiter assistance."}
+                    {request.note || "Guest requested hotel service assistance."}
                   </p>
 
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row">
@@ -289,8 +220,7 @@ const WaiterDashboard = () => {
               <div className="flex justify-between gap-4">
                 <div>
                   <h3 className="text-2xl font-black text-orange-500">
-                    {order.tableRoom?.type?.toUpperCase()}{" "}
-                    {order.tableRoom?.number}
+                    Room {order.tableRoom?.number}
                   </h3>
                   <p className="text-sm text-slate-500">
                     People: {order.numberOfPeople}

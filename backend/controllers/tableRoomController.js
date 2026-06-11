@@ -5,15 +5,15 @@ const {
   generateVerificationCode,
 } = require("../utils/tokenUtils");
 
-// Admin creates table/room
+// Admin creates room QR
 const createTableRoom = async (req, res) => {
   try {
-    const { type, number, label } = req.body;
+    const { number, label } = req.body;
 
-    if (!type || !number) {
+    if (!number) {
       return res.status(400).json({
         success: false,
-        message: "Type and number are required",
+        message: "Room number is required",
       });
     }
 
@@ -22,7 +22,7 @@ const createTableRoom = async (req, res) => {
     const qrUrl = `${process.env.CLIENT_URL}/qr/${qrToken}`;
 
     const tableRoom = await TableRoom.create({
-      type,
+      type: "room",
       number,
       label,
       qrToken,
@@ -31,7 +31,7 @@ const createTableRoom = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Table/Room created successfully",
+      message: "Room QR created successfully",
       tableRoom,
     });
   } catch (error) {
@@ -42,7 +42,7 @@ const createTableRoom = async (req, res) => {
   }
 };
 
-// Admin gets all tables/rooms
+// Admin gets all room QR records
 const getTableRooms = async (req, res) => {
   try {
     const tableRooms = await TableRoom.find().sort({ createdAt: -1 });
@@ -149,6 +149,7 @@ const scanQrToken = async (req, res) => {
       tableRoom: tableRoom._id,
       customer: req.user?._id || null,
       verificationCode,
+      isVerified: true,
       expiresAt,
       cartPreview: parsedCartPreview,
       numberOfPeople,
@@ -161,15 +162,14 @@ const scanQrToken = async (req, res) => {
 
     const io = req.app.get("io");
     if (io) {
-      io.emit("verification_code_created", fullSession);
+      io.emit("table_session_created", fullSession);
     }
 
     res.json({
       success: true,
-      message: "Verification session created.",
+      message: "Room service session created.",
       data: {
         sessionId: session._id,
-        verificationCode,
         session: fullSession,
       },
     });
@@ -248,7 +248,7 @@ const verifySessionCode = async (req, res) => {
   }
 };
 
-// Admin update table/room
+// Admin update room QR
 const updateTableRoom = async (req, res) => {
   try {
     const tableRoom = await TableRoom.findByIdAndUpdate(
@@ -260,13 +260,13 @@ const updateTableRoom = async (req, res) => {
     if (!tableRoom) {
       return res.status(404).json({
         success: false,
-        message: "Table/Room not found",
+        message: "Room QR not found",
       });
     }
 
     res.json({
       success: true,
-      message: "Table/Room updated successfully",
+      message: "Room QR updated successfully",
       tableRoom,
     });
   } catch (error) {
@@ -277,7 +277,7 @@ const updateTableRoom = async (req, res) => {
   }
 };
 
-// Admin delete table/room
+// Admin delete room QR
 const deleteTableRoom = async (req, res) => {
   try {
     const tableRoom = await TableRoom.findByIdAndDelete(req.params.id);
@@ -285,13 +285,13 @@ const deleteTableRoom = async (req, res) => {
     if (!tableRoom) {
       return res.status(404).json({
         success: false,
-        message: "Table/Room not found",
+        message: "Room QR not found",
       });
     }
 
     res.json({
       success: true,
-      message: "Table/Room deleted successfully",
+      message: "Room QR deleted successfully",
     });
   } catch (error) {
     res.status(500).json({

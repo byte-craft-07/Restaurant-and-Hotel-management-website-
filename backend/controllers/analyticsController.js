@@ -1,5 +1,5 @@
 const Order = require("../models/Order");
-const User = require("../models/User");
+const User = require("../models/user");
 
 const getAnalytics = async (req, res) => {
   try {
@@ -12,7 +12,11 @@ const getAnalytics = async (req, res) => {
       .select("-password")
       .lean();
 
-    const totalRevenue = orders.reduce(
+    const paidOrders = orders.filter(
+      (order) => !order.paymentStatus || order.paymentStatus === "paid"
+    );
+
+    const totalRevenue = paidOrders.reduce(
       (sum, order) => sum + (order.finalAmount || order.totalAmount || 0),
       0
     );

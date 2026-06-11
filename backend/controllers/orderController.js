@@ -1,11 +1,21 @@
 const Order = require("../models/Order");
 const MenuItem = require("../models/MenuItem");
 const VerificationSession = require("../models/VerificationSession");
-const User = require("../models/User");
+const User = require("../models/user");
+
+const generateCashCode = () =>
+  `CASH-${Math.floor(100000 + Math.random() * 900000)}`;
+
+const normalizeCashCode = (value = "") => {
+  const code = value.trim().toUpperCase();
+
+  if (!code) return "";
+  return code.startsWith("CASH-") ? code : `CASH-${code}`;
+};
 
 const createOrder = async (req, res) => {
   try {
-    const { sessionId, items, numberOfPeople, note } = req.body;
+    const { sessionId, items, numberOfPeople, note, paymentMethod } = req.body;
 
     if (!sessionId || !items || items.length === 0) {
       return res.status(400).json({
@@ -83,6 +93,21 @@ const createOrder = async (req, res) => {
     const discountPercent = customer?.discountPercent || 0;
     const discountAmount = Math.round((totalAmount * discountPercent) / 100);
     const finalAmount = totalAmount - discountAmount;
+    const safePaymentMethod = paymentMethod === "cash" ? "cash" : "online";
+    const paymentStatus =
+      safePaymentMethod === "cash" ? "pending_cash" : "paid";
+
+    let cashCode;
+
+    if (safePaymentMethod === "cash") {
+      let isUnique = false;
+
+      while (!isUnique) {
+        cashCode = generateCashCode();
+        const existingOrder = await Order.findOne({ cashCode });
+        isUnique = !existingOrder;
+      }
+    }
 
     const order = await Order.create({
       customer: req.user._id,
@@ -95,12 +120,17 @@ const createOrder = async (req, res) => {
       discountAmount,
       finalAmount,
       note,
+      status: safePaymentMethod === "cash" ? "payment_pending" : "pending",
+      paymentMethod: safePaymentMethod,
+      paymentStatus,
+      cashCode,
+      paidAt: safePaymentMethod === "online" ? new Date() : undefined,
     });
 
     await User.findByIdAndUpdate(req.user._id, {
       $inc: {
         orderCount: 1,
-        totalSpent: finalAmount,
+        totalSpent: safePaymentMethod === "online" ? finalAmount : 0,
       },
     });
 
@@ -206,9 +236,95 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+const findOrderByCashCode = async (req, res) => {
+  try {
+    const code = normalizeCashCode(req.params.code);
+
+    const order = await Order.findOne({ cashCode: code })
+      .populate("customer", "name phone email")
+      .populate("tableRoom", "type number label");
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "No bill found for this cash code",
+      });
+    }
+
+    res.json({
+      success: true,
+      order,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const markCashPaymentPaid = async (req, res) => {
+  try {
+    const code = normalizeCashCode(req.params.code);
+
+    const existingOrder = await Order.findOne({ cashCode: code });
+
+    if (!existingOrder) {
+      return res.status(404).json({
+        success: false,
+        message: "No bill found for this cash code",
+      });
+    }
+
+    const wasAlreadyPaid = existingOrder.paymentStatus === "paid";
+
+    const order = await Order.findOneAndUpdate(
+      { cashCode: code },
+      {
+        paymentStatus: "paid",
+        status:
+          existingOrder.status === "payment_pending"
+            ? "pending"
+            : existingOrder.status,
+        paidAt: new Date(),
+      },
+      { new: true, runValidators: true }
+    )
+      .populate("customer", "name phone email")
+      .populate("tableRoom", "type number label");
+
+    if (!wasAlreadyPaid) {
+      await User.findByIdAndUpdate(order.customer._id || order.customer, {
+        $inc: {
+          totalSpent: order.finalAmount || order.totalAmount || 0,
+        },
+      });
+    }
+
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("order_payment_updated", order);
+      io.emit("order_status_updated", order);
+    }
+
+    res.json({
+      success: true,
+      message: "Payment complete. Order confirmed",
+      order,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   getAllOrders,
   getMyOrders,
   updateOrderStatus,
+  findOrderByCashCode,
+  markCashPaymentPaid,
 };

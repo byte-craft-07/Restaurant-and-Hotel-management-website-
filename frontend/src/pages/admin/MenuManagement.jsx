@@ -66,7 +66,7 @@ const MenuManagement = () => {
           </div>
           <h1 className="text-4xl font-black text-slate-950">Menu Items</h1>
           <p className="mt-2 text-slate-500">
-            Manage restaurant food items with premium visuals.
+            Manage hotel room-service food items with premium visuals.
           </p>
         </div>
 

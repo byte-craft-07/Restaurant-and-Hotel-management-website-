@@ -44,7 +44,7 @@ const CustomerProfile = () => {
 
             <h1 className="text-4xl font-black text-slate-950">My Profile</h1>
             <p className="mt-2 text-slate-500">
-              Your customer details and active restaurant offers.
+              Your guest details and active hotel offers.
             </p>
           </div>
 

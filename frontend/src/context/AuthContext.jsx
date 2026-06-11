@@ -3,8 +3,16 @@ import api from "../services/api";
 
 const AuthContext = createContext();
 
+const getStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "null");
+  } catch {
+    return null;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(getStoredUser);
   const [loading, setLoading] = useState(true);
 
   const login = async (formData) => {
@@ -14,6 +22,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", res.data.token);
     }
 
+    localStorage.setItem("user", JSON.stringify(res.data.user));
     setUser(res.data.user);
 
     return res.data;
@@ -23,6 +32,7 @@ export const AuthProvider = ({ children }) => {
     const res = await api.post("/auth/register", formData);
 
     localStorage.setItem("token", res.data.token);
+    localStorage.setItem("user", JSON.stringify(res.data.user));
     setUser(res.data.user);
 
     return res.data;
@@ -31,14 +41,18 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
   await api.post("/auth/logout");
   localStorage.removeItem("token");
+  localStorage.removeItem("user");
   setUser(null);
 };
 
   const getMe = async () => {
   try {
     const res = await api.get("/auth/me");
+    localStorage.setItem("user", JSON.stringify(res.data.user));
     setUser(res.data.user);
   } catch {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setUser(null);
   } finally {
     setLoading(false);

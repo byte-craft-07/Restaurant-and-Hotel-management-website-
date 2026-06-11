@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import BrandLogo from "../../components/BrandLogo";
-import FloatingFoodScene from "../../components/FloatingFoodScene";
 import { FieldError } from "../../components/form/PremiumFields";
 import { getCustomerRedirect } from "../../utils/authRedirect";
 
@@ -110,7 +109,7 @@ const Register = () => {
             </h1>
 
             <p className="mt-6 text-lg text-slate-600">
-              Scan QR, verify your table, place orders, track history and unlock
+              Scan QR, verify your room, place orders, track history and unlock
               personalized offers as a regular customer.
             </p>
 
@@ -132,9 +131,6 @@ const Register = () => {
             </div>
           </motion.div>
 
-          <div className="max-h-[300px] overflow-hidden rounded-[2rem] border border-white/70 bg-white/60 shadow-2xl backdrop-blur-2xl xl:max-h-[340px]">
-            <FloatingFoodScene className="h-[300px] w-full xl:h-[340px]" />
-          </div>
         </section>
 
         <section className="flex items-center justify-center px-5 py-10">
@@ -166,7 +162,7 @@ const Register = () => {
 
             {qrToken && (
               <div className="mb-5 rounded-2xl border border-orange-200 bg-orange-50 p-3 text-sm font-semibold text-orange-700">
-                Table QR detected. Create a customer account to save order
+                Room QR detected. Create a customer account to save order
                 history and offers.
               </div>
             )}

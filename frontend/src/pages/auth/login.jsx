@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { ArrowRight, Lock, Mail, Sparkles } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import BrandLogo from "../../components/BrandLogo";
-import FloatingFoodScene from "../../components/FloatingFoodScene";
 import { FieldError } from "../../components/form/PremiumFields";
 import { getCustomerRedirect, getRoleRedirect } from "../../utils/authRedirect";
 
@@ -56,7 +55,10 @@ const Login = () => {
     setError("");
 
     try {
-      const data = await login(formData);
+      const data = await login({
+        emailOrPhone: formData.emailOrPhone.trim(),
+        password: formData.password,
+      });
 
       if (qrToken) {
         localStorage.setItem("qrToken", qrToken);
@@ -95,12 +97,12 @@ const Login = () => {
             <h1 className="text-5xl font-black leading-tight xl:text-6xl">
               Welcome back to your{" "}
               <span className="text-orange-500">
-                restaurant control room.
+                hotel control room.
               </span>
             </h1>
 
             <p className="mt-6 text-lg text-slate-600">
-              Manage orders, QR tables, waiter flow, kitchen display and
+              Manage orders, room QR codes, service flow, kitchen display and
               customer loyalty from one beautifully connected system.
             </p>
 
@@ -122,9 +124,6 @@ const Login = () => {
             </div>
           </motion.div>
 
-          <div className="max-h-[300px] overflow-hidden rounded-[2rem] border border-white/70 bg-white/60 shadow-2xl backdrop-blur-2xl xl:max-h-[340px]">
-            <FloatingFoodScene className="h-[300px] w-full xl:h-[340px]" />
-          </div>
         </section>
 
         <section className="flex items-center justify-center px-5 py-10">
@@ -158,7 +157,7 @@ const Login = () => {
               <div className="mb-5 rounded-2xl border border-orange-200 bg-orange-50 p-3 text-sm font-semibold text-orange-700">
                 {switchCustomer
                   ? "Staff session detected. Login as customer to track this QR order."
-                  : "Table QR detected. Login once to track orders and offers."}
+                  : "Room QR detected. Login once to track orders and offers."}
               </div>
             )}
 
@@ -213,6 +212,21 @@ const Login = () => {
                 <ArrowRight size={20} />
               </button>
             </form>
+
+            <button
+              type="button"
+              onClick={() => {
+                setFormData({
+                  emailOrPhone: "admin@restro.com",
+                  password: "admin123",
+                });
+                setError("");
+                setFormErrors({});
+              }}
+              className="mt-4 w-full rounded-2xl border border-orange-200 bg-orange-50 p-3 text-sm font-bold text-orange-600 transition hover:bg-orange-100"
+            >
+              Use admin login
+            </button>
 
             <p className="mt-6 text-center text-sm text-slate-500">
               New customer?{" "}

@@ -13,7 +13,7 @@ const createServiceRequest = async (req, res) => {
     if (!qrToken) {
       return res.status(400).json({
         success: false,
-        message: "Please scan table QR first.",
+        message: "Please scan your room QR first.",
       });
     }
 

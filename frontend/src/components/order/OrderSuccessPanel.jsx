@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
+  Banknote,
   CheckCircle2,
   ChefHat,
   Clock3,
@@ -9,17 +9,17 @@ import {
   ReceiptText,
   Sparkles,
 } from "lucide-react";
-import { RESTAURANT_BRAND, getTableDisplay } from "../../services/restaurantBranding";
+import { HOTEL_BRAND, getRoomDisplay } from "../../services/restaurantBranding";
 
 const timelineSteps = [
   {
     title: "Order Received",
-    description: "Your table order has reached the service team.",
+    description: "Your room-service order has reached the hotel team.",
     icon: ReceiptText,
   },
   {
     title: "Preparing",
-    description: "Kitchen is reviewing your dishes and notes.",
+    description: "The kitchen is reviewing your dishes and notes.",
     icon: ChefHat,
   },
   {
@@ -29,7 +29,7 @@ const timelineSteps = [
   },
   {
     title: "Ready to Serve",
-    description: "Staff will bring it to your table shortly.",
+    description: "Hotel staff will bring it to your room shortly.",
     icon: ConciergeBell,
   },
 ];
@@ -38,7 +38,7 @@ const OrderSuccessPanel = ({
   order,
   onNewOrder,
   onClose,
-  brand = RESTAURANT_BRAND,
+  brand = HOTEL_BRAND,
 }) => {
   const [activeStep, setActiveStep] = useState(0);
 
@@ -61,6 +61,9 @@ const OrderSuccessPanel = ({
 
   if (!order) return null;
 
+  const isCashPending =
+    order.paymentMethod === "cash" && order.paymentStatus !== "paid";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -78,22 +81,40 @@ const OrderSuccessPanel = ({
 
         <div className="premium-label-pill mb-4 bg-white/80">
           <Sparkles size={17} />
-          Order confirmed
+          {isCashPending ? "Payment pending" : "Order confirmed"}
         </div>
 
         <h2 className="text-3xl font-black text-slate-950">
-          Thank you, your order is in motion.
+          {isCashPending
+            ? "Show the cash code to confirm your order."
+            : order.paymentMethod === "cash"
+            ? "Payment successful, your order confirmed."
+            : "Thank you, your order is in motion."}
         </h2>
         <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-slate-600">
-          {brand.name} has received your order for{" "}
-          <span className="font-black text-slate-900">
-            {getTableDisplay(order.tableRoom)}
-          </span>
-          . Estimated preparation time is{" "}
-          <span className="font-black text-orange-600">
-            {brand.prepTimeMinutes} min
-          </span>
-          .
+          {isCashPending ? (
+            <>
+              Your bill is waiting for cash payment. The kitchen will receive
+              it after admin marks the payment as paid.
+            </>
+          ) : order.paymentMethod === "cash" ? (
+            <>
+              Admin has completed your cash payment. The kitchen has received
+              your confirmed order.
+            </>
+          ) : (
+            <>
+              {brand.name} has received your order for{" "}
+              <span className="font-black text-slate-900">
+                {getRoomDisplay(order.tableRoom)}
+              </span>
+              . Estimated preparation time is{" "}
+              <span className="font-black text-orange-600">
+                {brand.prepTimeMinutes} min
+              </span>
+              .
+            </>
+          )}
         </p>
       </div>
 
@@ -127,51 +148,73 @@ const OrderSuccessPanel = ({
         </div>
       </div>
 
-      <div className="rounded-[2rem] border border-white bg-white/85 p-5 shadow-lg">
-        <h3 className="mb-4 text-xl font-black text-slate-950">
-          Live Order Timeline
-        </h3>
+      {order.paymentMethod === "cash" && (
+        <div className="rounded-[2rem] border border-green-200 bg-green-50 p-5 shadow-lg">
+          <div className="mb-3 flex items-center gap-2 font-black text-green-700">
+            <Banknote size={22} />
+            Cash Payment Code
+          </div>
+          <p className="text-sm leading-6 text-slate-600">
+            Show this code at the hotel counter. The admin can open your recent
+            bill and mark the payment as paid.
+          </p>
+          <p className="mt-4 rounded-2xl bg-white p-4 text-center text-3xl font-black tracking-widest text-green-700">
+            {order.cashCode}
+          </p>
+          <p className="mt-3 text-center text-sm font-bold text-green-700">
+            Payment status:{" "}
+            {order.paymentStatus === "paid" ? "Paid" : "Pending cash"}
+          </p>
+        </div>
+      )}
 
-        <div className="space-y-3">
-          {timelineSteps.map((step, index) => {
-            const Icon = step.icon;
-            const isActive = index <= activeStep;
+      {!isCashPending && (
+        <div className="rounded-[2rem] border border-white bg-white/85 p-5 shadow-lg">
+          <h3 className="mb-4 text-xl font-black text-slate-950">
+            Live Order Timeline
+          </h3>
 
-            return (
-              <motion.div
-                key={step.title}
-                animate={{
-                  scale: isActive && index === activeStep ? [1, 1.02, 1] : 1,
-                }}
-                transition={{ duration: 0.7 }}
-                className={`flex gap-3 rounded-2xl border p-4 ${
-                  isActive
-                    ? "border-orange-100 bg-orange-50"
-                    : "border-slate-100 bg-slate-50"
-                }`}
-              >
-                <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
+          <div className="space-y-3">
+            {timelineSteps.map((step, index) => {
+              const Icon = step.icon;
+              const isActive = index <= activeStep;
+
+              return (
+                <motion.div
+                  key={step.title}
+                  animate={{
+                    scale: isActive && index === activeStep ? [1, 1.02, 1] : 1,
+                  }}
+                  transition={{ duration: 0.7 }}
+                  className={`flex gap-3 rounded-2xl border p-4 ${
                     isActive
-                      ? "bg-orange-500 text-white"
-                      : "bg-white text-slate-400"
+                      ? "border-orange-100 bg-orange-50"
+                      : "border-slate-100 bg-slate-50"
                   }`}
                 >
-                  <Icon size={19} />
-                </div>
-                <div>
-                  <p className="font-black text-slate-900">{step.title}</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-500">
-                    {step.description}
-                  </p>
-                </div>
-              </motion.div>
-            );
-          })}
+                  <div
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${
+                      isActive
+                        ? "bg-orange-500 text-white"
+                        : "bg-white text-slate-400"
+                    }`}
+                  >
+                    <Icon size={19} />
+                  </div>
+                  <div>
+                    <p className="font-black text-slate-900">{step.title}</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-500">
+                      {step.description}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3">
         <button
           type="button"
           onClick={onNewOrder}
@@ -179,13 +222,6 @@ const OrderSuccessPanel = ({
         >
           Add more items
         </button>
-        <Link
-          to="/kitchen"
-          className="rounded-2xl border border-slate-200 bg-white px-5 py-4 text-center font-black text-slate-700 shadow-sm hover:border-orange-200 hover:text-orange-500"
-          onClick={onClose}
-        >
-          View kitchen demo
-        </Link>
       </div>
     </motion.div>
   );

@@ -28,7 +28,7 @@ Show homepage.
 
 Say:
 
-> DineLink OS is an AI-powered QR ordering system for modern restaurants. It turns a simple table QR into a premium ordering, verification, and kitchen workflow.
+> DineLink OS is an AI-powered QR ordering system for modern hotels. It turns a simple room QR into a premium ordering, verification, and kitchen workflow.
 
 Point to:
 
@@ -46,12 +46,12 @@ Simulate QR Scan
 
 Say:
 
-> This simulates a customer scanning the QR code on their table.
+> This simulates a guest scanning the QR code in their room.
 
 The demo QR is:
 
 ```text
-/qr/demo-table-t1
+/qr/demo-room-101
 ```
 
 ## 0:30 - 0:55 Branded Menu
@@ -60,14 +60,14 @@ Show menu page.
 
 Point to:
 
-- Restaurant branding
+- Hotel branding
 - Busy/Open status
-- Table context
+- Room context
 - Menu cards
 
 Say:
 
-> The experience is table-aware and branded for the restaurant, so it feels like a real venue rather than a generic menu.
+> The experience is room-aware and branded for the hotel, so it feels like a real venue rather than a generic menu.
 
 ## 0:55 - 1:15 AI Ordering
 
@@ -113,7 +113,7 @@ Enter demo code:
 
 Say:
 
-> Verification keeps table orders safe and gives staff confidence before the order enters the kitchen.
+> Verification keeps room orders safe and gives staff confidence before the order enters the kitchen.
 
 ## 1:35 - 1:50 Success Timeline
 
@@ -146,13 +146,13 @@ Mark Ready/Served
 
 Say:
 
-> The kitchen receives clear table-aware tickets and can move orders through the workflow live.
+> The kitchen receives clear room-aware tickets and can move orders through the workflow live.
 
 ## Backup Plan
 
 If backend/API is unavailable:
 
-- Use `http://localhost:5173/qr/demo-table-t1`
+- Use `http://localhost:5173/qr/demo-room-101`
 - The app loads sample menu data
 - AI uses local fallback parsing
 - Use code `123456`
@@ -167,4 +167,3 @@ If backend/API is unavailable:
 - Cart verification
 - Success timeline
 - Kitchen status update
-

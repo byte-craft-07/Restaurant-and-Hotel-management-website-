@@ -1,10 +1,10 @@
 export const DEMO_RESTAURANT = {
   name: "DineLink OS",
   tagline: "AI-powered ultra-fast QR ordering experience.",
-  tableLabel: "Table T1",
+  tableLabel: "Room 101",
 };
 
-export const DEMO_QR_TOKEN = "demo-table-t1";
+export const DEMO_QR_TOKEN = "demo-room-101";
 export const DEMO_VERIFICATION_CODE = "123456";
 export const DEMO_KITCHEN_ORDERS_KEY = "dineLinkDemoKitchenOrders";
 
@@ -18,7 +18,7 @@ export const createDemoOrderFromCart = ({
   tableContext,
 }) => ({
   _id: `demo-live-${Date.now()}`,
-  tableRoom: tableContext || { type: "table", number: "T1" },
+  tableRoom: tableContext || { type: "room", number: "101" },
   numberOfPeople,
   status: "pending",
   totalAmount,
@@ -657,7 +657,7 @@ export const buildDemoBackedMenu = ({
 export const DEMO_ORDERS = [
   {
     _id: "demo-order-1",
-    tableRoom: { type: "table", number: "T4" },
+    tableRoom: { type: "room", number: "204" },
     numberOfPeople: 3,
     status: "pending",
     totalAmount: 660,
@@ -671,7 +671,7 @@ export const DEMO_ORDERS = [
   },
   {
     _id: "demo-order-2",
-    tableRoom: { type: "room", number: "R101" },
+    tableRoom: { type: "room", number: "101" },
     numberOfPeople: 2,
     status: "accepted",
     totalAmount: 520,
@@ -682,7 +682,7 @@ export const DEMO_ORDERS = [
   },
   {
     _id: "demo-order-3",
-    tableRoom: { type: "table", number: "T7" },
+    tableRoom: { type: "room", number: "307" },
     numberOfPeople: 4,
     status: "preparing",
     totalAmount: 640,

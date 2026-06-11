@@ -1,24 +1,24 @@
 # DineLink OS
 
-AI-powered ultra-fast QR ordering experience for modern restaurants.
+AI-powered ultra-fast QR room-service experience for modern hotels.
 
-DineLink OS is a React + Express hackathon project that shows how small restaurants can run QR-based guest ordering, AI-assisted cart building, waiter verification, live kitchen operations, and customer tracking from one polished system.
+DineLink OS is a React + Express hackathon project that shows how hotels can run QR-based in-room ordering, AI-assisted cart building, service-staff verification, live kitchen operations, and guest tracking from one polished system.
 
 ## Judge Quick Start
 
-**What it is:** A restaurant SaaS demo where guests scan a QR code, order with AI, and the kitchen receives live table-aware tickets.
+**What it is:** A hotel SaaS demo where guests scan a room QR code, order with AI, and the kitchen receives live room-aware tickets.
 
 **Fast demo route:**
 
 ```text
-Homepage -> Simulate QR Scan -> AI Menu -> Cart -> Code 123456 -> Success Timeline -> Kitchen Dashboard
+Homepage -> Simulate Room QR -> AI Menu -> Cart -> Code 123456 -> Success Timeline -> Kitchen Dashboard
 ```
 
 **Why it stands out:**
 
 - Practical AI that builds a cart from real menu items
 - Premium mobile-first QR ordering flow
-- Table-aware verification and kitchen handoff
+- Room-aware verification and kitchen handoff
 - Demo-safe fallback if backend data is empty
 - Startup-style product polish, not a raw prototype
 
@@ -33,29 +33,29 @@ Homepage -> Simulate QR Scan -> AI Menu -> Cart -> Code 123456 -> Success Timeli
 
 ## Product Vision
 
-Small restaurants should not need enterprise software to create a premium digital ordering experience. DineLink OS turns a simple table QR into a branded guest journey, an AI ordering concierge, and a live operations layer for staff and kitchen teams.
+Hotels should not need enterprise software to create a premium in-room ordering experience. DineLink OS turns a simple room QR into a branded guest journey, an AI ordering concierge, and a live operations layer for service staff and kitchen teams.
 
-The goal is to feel like a real restaurant SaaS startup: fast for guests, calm for staff, and impressive for owners.
+The goal is to feel like a real hotel SaaS startup: fast for guests, calm for staff, and impressive for owners.
 
 ## Problem
 
-Most QR menus feel like static web pages. They do not understand guest intent, they rarely connect cleanly to kitchen operations, and they make small restaurants look less premium than they are.
+Most hotel QR menus feel like static web pages. They do not understand guest intent, they rarely connect cleanly to kitchen operations, and they make hotels look less premium than they are.
 
-Restaurants need:
+Hotels need:
 
 - Faster ordering without staff confusion
-- Table-aware order verification
+- Room-aware order verification
 - Live kitchen visibility
 - Better customer experience on mobile
 - A digital menu that feels branded and trustworthy
 
 ## Solution
 
-DineLink OS combines QR ordering, AI-assisted cart building, table verification, live kitchen dashboards, customer loyalty data, and analytics inside one premium React app.
+DineLink OS combines QR ordering, AI-assisted cart building, room verification, live kitchen dashboards, guest loyalty data, and analytics inside one premium React app.
 
 ## Project Pitch
 
-Guests scan a table QR, open a premium digital menu, type what they want in natural language, and the system converts that request into real menu/cart actions. Staff get clear verification and kitchen dashboards so the restaurant workflow stays fast, secure, and easy to demo.
+Guests scan a room QR, open a premium digital menu, type what they want in natural language, and the system converts that request into real menu/cart actions. Staff get clear verification and kitchen dashboards so the hotel workflow stays fast, secure, and easy to demo.
 
 ## Feature Highlights
 
@@ -66,20 +66,20 @@ Guests scan a table QR, open a premium digital menu, type what they want in natu
 - Cart drawer with verification flow
 - Demo QR mode for hackathon presentation
 - Live Kitchen Display System
-- Waiter/admin order management
-- Table/room QR management
+- Service-staff/admin order management
+- Room QR management
 - Customer profile, order history, loyalty discounts
 - Analytics dashboard
 - Mobile-first responsive layout
-- Restaurant branding system with status, tags, avatar, banner, and table context
+- Hotel branding system with status, tags, avatar, banner, and room context
 - Animated order success timeline
 - Demo story mode with meaningful sample menu and kitchen activity
 
-## Restaurant Branding Layer
+## Hotel Branding Layer
 
-The guest experience uses a reusable restaurant configuration:
+The guest experience uses a reusable hotel configuration:
 
-- Restaurant name and avatar
+- Hotel name and avatar
 - Accent color
 - Banner image
 - Cuisine tags
@@ -102,16 +102,16 @@ frontend/
   src/
     components/
       order/                 Order success and timeline UI
-      restaurant/            Venue branding components
+      restaurant/            Hotel branding components
       motion/                Premium hover and interaction helpers
     pages/
-      customer/              QR menu and customer order flow
+      customer/              QR menu and guest order flow
       admin/                 Admin dashboards and management pages
       kitchen/               Kitchen Display System
     services/
       aiOrderAssistant.js    Natural language order parsing
       demoExperience.js      Hackathon story/demo data
-      restaurantBranding.js  Venue branding configuration
+      restaurantBranding.js  Hotel branding configuration
       api.js                 Axios API client
 
 backend/
@@ -233,7 +233,7 @@ http://localhost:5173/
 1. Open the homepage.
 2. Click `Simulate QR Scan`.
 3. Login or create a customer account.
-4. The menu opens with demo table context.
+4. The menu opens with demo room context.
 5. Use the AI assistant:
 
 ```text
@@ -268,7 +268,7 @@ Set it to `false` when you want strict auth behavior during production-like test
 Demo QR token:
 
 ```text
-demo-table-t1
+demo-room-101
 ```
 
 Demo verification code:
@@ -292,7 +292,7 @@ Add screenshots here before final submission:
 This project is designed to be judged as a complete experience:
 
 - The homepage explains the value quickly.
-- The guest flow demonstrates AI in a practical restaurant context.
+- The guest flow demonstrates AI in a practical hotel room-service context.
 - The kitchen dashboard proves operational usefulness.
 - Demo safety mode prevents blank screens during live presentation.
 - The README, pitch, and demo script make the project easy to present.
@@ -301,11 +301,12 @@ This project is designed to be judged as a complete experience:
 
 ```text
 /                 Landing page
-/qr/demo-table-t1 Simulated QR flow
+/qr/demo-room-101 Simulated QR flow
 /menu             Customer menu
 /kitchen          Kitchen display
 /admin            Admin dashboard
-/waiter/orders    Waiter dashboard
+/service/orders   Service staff dashboard
+/waiter/orders    Legacy service staff route
 ```
 
 ## Production Improvements
@@ -323,10 +324,10 @@ This project is designed to be judged as a complete experience:
 
 ## Future Roadmap
 
-- Multi-restaurant SaaS tenancy
+- Multi-hotel SaaS tenancy
 - AI-powered recommendations and combo optimization
 - Payment gateway abstraction
 - PWA mode for guests and staff
 - Kitchen prep-time prediction
 - Manager-level business insights
-- Theme studio for restaurant owners
+- Theme studio for hotel owners

@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DineLink OS Slides</title>
+    <style>
+      :root {
+        --ink: #0f172a;
+        --muted: #64748b;
+        --orange: #f97316;
+        --pink: #db2777;
+        --green: #16a34a;
+        --paper: #fffaf4;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #111827;
+        color: var(--ink);
+        font-family: Inter, Segoe UI, Arial, sans-serif;
+      }
+
+      .deck {
+        width: 1280px;
+        margin: 0 auto;
+      }
+
+      .slide {
+        width: 1280px;
+        min-height: 720px;
+        padding: 64px;
+        background:
+          radial-gradient(circle at top left, rgba(249, 115, 22, 0.22), transparent 34%),
+          radial-gradient(circle at bottom right, rgba(219, 39, 119, 0.18), transparent 30%),
+          #f8f6f2;
+        border-bottom: 10px solid #111827;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 76px;
+        line-height: 0.96;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        margin: 0 0 26px;
+        font-size: 54px;
+        line-height: 1.04;
+      }
+
+      h3 {
+        margin: 0 0 8px;
+        font-size: 26px;
+      }
+
+      p {
+        color: var(--muted);
+        font-size: 24px;
+        line-height: 1.42;
+        margin: 0;
+      }
+
+      .eyebrow {
+        width: fit-content;
+        border: 1px solid #fed7aa;
+        border-radius: 999px;
+        background: #fff7ed;
+        color: #ea580c;
+        padding: 10px 16px;
+        font-size: 18px;
+        font-weight: 900;
+        margin-bottom: 26px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+      }
+
+      .card {
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+        padding: 28px;
+      }
+
+      .num {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 16px;
+        background: var(--orange);
+        color: white;
+        font-weight: 900;
+        font-size: 24px;
+        margin-bottom: 18px;
+      }
+
+      .big {
+        max-width: 900px;
+        font-size: 30px;
+      }
+
+      .accent {
+        color: var(--orange);
+      }
+
+      .pink {
+        color: var(--pink);
+      }
+
+      .green {
+        color: var(--green);
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 26px;
+      }
+
+      li {
+        margin: 12px 0;
+        color: var(--muted);
+        font-size: 24px;
+      }
+
+      .footer {
+        margin-top: 48px;
+        color: #94a3b8;
+        font-size: 16px;
+        font-weight: 800;
+      }
+
+      @media print {
+        body {
+          background: white;
+        }
+
+        .deck,
+        .slide {
+          width: 100%;
+        }
+
+        .slide {
+          page-break-after: always;
+          border-bottom: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="deck">
+      <section class="slide">
+        <div class="eyebrow">Hotel and Hotel Management Website</div>
+        <h1>DineLink <span class="accent">OS</span></h1>
+        <p class="big" style="margin-top: 28px">
+          A QR ordering, staff operations, payment confirmation, and event
+          booking platform for modern hotels.
+        </p>
+        <div class="footer">Project presentation deck</div>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow">Problem</div>
+        <h2>Hotels need faster ordering and clearer operations.</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Manual order delays</h3>
+            <p>Staff take orders repeatedly, room context can be missed.</p>
+          </div>
+          <div class="card">
+            <h3>Payment confusion</h3>
+            <p>Cash and online payment need different confirmation flows.</p>
+          </div>
+          <div class="card">
+            <h3>Kitchen coordination</h3>
+            <p>Kitchen needs a live queue, not verbal handoffs.</p>
+          </div>
+          <div class="card">
+            <h3>Event planning</h3>
+            <p>Special event requests need structured requirements and follow-up.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow">Solution</div>
+        <h2>DineLink OS connects guests, staff, kitchen, and admin.</h2>
+        <div class="grid-3">
+          <div class="card">
+            <div class="num">1</div>
+            <h3>Customer</h3>
+            <p>Scans QR, orders food, chooses payment, tracks history.</p>
+          </div>
+          <div class="card">
+            <div class="num">2</div>
+            <h3>Staff</h3>
+            <p>Handles orders, payments, service requests, and rooms.</p>
+          </div>
+          <div class="card">
+            <div class="num">3</div>
+            <h3>Kitchen</h3>
+            <p>Receives confirmed orders and updates preparation status.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow">Core Features</div>
+        <h2>What the project includes</h2>
+        <ul>
+          <li>Role-based login for customer, admin, service staff, and kitchen.</li>
+          <li>QR-based room menu and cart ordering.</li>
+          <li>Cash code payment flow with admin confirmation.</li>
+          <li>Live kitchen and service staff dashboards.</li>
+          <li>Menu, category, staff, guest, room, and order management.</li>
+          <li>Special events module with automatic budget estimate.</li>
+        </ul>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow">Payment Flow</div>
+        <h2>Cash payment becomes confirmed only after admin approval.</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Online</h3>
+            <p>Order is marked paid and enters normal order flow.</p>
+          </div>
+          <div class="card">
+            <h3>Cash</h3>
+            <p>Customer gets a CASH code. Admin searches the code and clicks Mark Paid.</p>
+          </div>
+          <div class="card">
+            <h3>Before Mark Paid</h3>
+            <p>Order is payment pending and not treated as confirmed.</p>
+          </div>
+          <div class="card">
+            <h3>After Mark Paid</h3>
+            <p>Payment successful, order confirmed, kitchen receives it.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow">Special Events</div>
+        <h2>Customers can plan birthdays, parties, and custom events.</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Requirements</h3>
+            <p>Event type, date, guest count, food, decor, contact, room or area.</p>
+          </div>
+          <div class="card">
+            <h3>Food selection</h3>
+            <p>Available hotel menu chips plus custom dish requirements.</p>
+          </div>
+          <div class="card">
+            <h3>Budget estimate</h3>
+            <p>Auto bill estimate based on guests, event type, decor, and setup.</p>
+          </div>
+          <div class="card">
+            <h3>Admin follow-up</h3>
+            <p>Admin sees requests, status, notes, and customer details.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow">Architecture</div>
+        <h2>Full-stack MERN-style implementation</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Frontend</h3>
+            <p>React, Vite, protected routes, auth context, cart context, responsive UI.</p>
+          </div>
+          <div class="card">
+            <h3>Backend</h3>
+            <p>Node.js, Express, REST APIs, JWT middleware, role authorization.</p>
+          </div>
+          <div class="card">
+            <h3>Database</h3>
+            <p>MongoDB models for users, menu, orders, events, rooms, service requests.</p>
+          </div>
+          <div class="card">
+            <h3>Realtime</h3>
+            <p>Socket.IO updates for orders, payment completion, and service operations.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow">Demo Flow</div>
+        <h2>Recommended walkthrough</h2>
+        <ul>
+          <li>Login as customer and place a cash order.</li>
+          <li>Copy the generated cash code.</li>
+          <li>Login as admin and open Payments.</li>
+          <li>Search code, click Mark Paid, and confirm order.</li>
+          <li>Open Kitchen to see the live order queue.</li>
+          <li>Submit a Special Event request and review it in Admin Events.</li>
+        </ul>
+      </section>
+
+      <section class="slide">
+        <div class="eyebrow">Impact</div>
+        <h2>DineLink OS shows a complete hotel workflow.</h2>
+        <p class="big">
+          The project demonstrates customer ordering, staff control, payment
+          handling, realtime kitchen operations, customer history, and event
+          planning in one connected application.
+        </p>
+        <div class="footer">End of presentation</div>
+      </section>
+    </main>
+  </body>
+</html>

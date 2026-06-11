@@ -180,7 +180,7 @@ const EditMenuItem = () => {
           </h2>
 
           <p className="mt-3 text-slate-500">
-            This food item may have been removed or updated by the restaurant.
+            This food item may have been removed or updated by the hotel.
           </p>
 
           <button

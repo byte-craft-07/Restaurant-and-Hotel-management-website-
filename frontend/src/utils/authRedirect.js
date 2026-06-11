@@ -4,6 +4,7 @@ const isInternalPath = (path) =>
 const isStaffArea = (path) =>
   path.startsWith("/admin") ||
   path.startsWith("/waiter") ||
+  path.startsWith("/service") ||
   path.startsWith("/kitchen");
 
 export const getCustomerRedirect = (redirect) => {
@@ -24,9 +25,9 @@ export const getRoleRedirect = (role, redirect) => {
   }
 
   if (role === "waiter") {
-    return safeRedirect.startsWith("/waiter")
+    return safeRedirect.startsWith("/waiter") || safeRedirect.startsWith("/service")
       ? safeRedirect
-      : "/waiter/orders";
+      : "/service/orders";
   }
 
   if (role === "kitchen") {

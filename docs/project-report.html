@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DineLink OS Project Report</title>
+    <style>
+      :root {
+        --ink: #111827;
+        --muted: #64748b;
+        --line: #e5e7eb;
+        --orange: #f97316;
+        --green: #16a34a;
+        --pink: #db2777;
+        --paper: #fffaf4;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #f8f6f2;
+        color: var(--ink);
+        font-family: Inter, Segoe UI, Arial, sans-serif;
+        line-height: 1.55;
+      }
+
+      .page {
+        max-width: 980px;
+        margin: 32px auto;
+        background: white;
+        border: 1px solid var(--line);
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.12);
+      }
+
+      .cover {
+        padding: 64px;
+        background:
+          linear-gradient(135deg, rgba(249, 115, 22, 0.14), transparent 42%),
+          linear-gradient(315deg, rgba(219, 39, 119, 0.12), transparent 36%),
+          white;
+      }
+
+      .content {
+        padding: 48px 64px 64px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 56px;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      h2 {
+        margin: 40px 0 12px;
+        font-size: 28px;
+      }
+
+      h3 {
+        margin: 24px 0 8px;
+        font-size: 18px;
+      }
+
+      p {
+        margin: 0 0 12px;
+      }
+
+      .tag {
+        display: inline-flex;
+        margin-bottom: 24px;
+        border: 1px solid #fed7aa;
+        border-radius: 999px;
+        background: #fff7ed;
+        color: #ea580c;
+        padding: 8px 14px;
+        font-weight: 800;
+        font-size: 13px;
+      }
+
+      .subtitle {
+        margin-top: 20px;
+        max-width: 720px;
+        color: var(--muted);
+        font-size: 20px;
+      }
+
+      .meta {
+        margin-top: 36px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: #fff;
+        padding: 18px;
+      }
+
+      .card strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+
+      .pill {
+        display: inline-flex;
+        border-radius: 999px;
+        padding: 5px 10px;
+        background: #f1f5f9;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 800;
+        margin: 4px 6px 4px 0;
+      }
+
+      .flow {
+        counter-reset: step;
+        display: grid;
+        gap: 12px;
+      }
+
+      .flow div {
+        counter-increment: step;
+        border-left: 4px solid var(--orange);
+        background: #fff7ed;
+        border-radius: 14px;
+        padding: 14px 16px;
+      }
+
+      .flow div::before {
+        content: counter(step);
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 26px;
+        height: 26px;
+        margin-right: 10px;
+        border-radius: 50%;
+        background: var(--orange);
+        color: white;
+        font-weight: 900;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        padding: 12px 10px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: #f8fafc;
+        font-size: 13px;
+        color: #475569;
+      }
+
+      .highlight {
+        border: 1px solid #bbf7d0;
+        border-radius: 18px;
+        background: #f0fdf4;
+        padding: 18px;
+      }
+
+      .note {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media print {
+        body {
+          background: white;
+        }
+
+        .page {
+          margin: 0;
+          max-width: none;
+          border: 0;
+          box-shadow: none;
+        }
+
+        .break {
+          page-break-before: always;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <article class="page">
+      <section class="cover">
+        <span class="tag">Hotel and Hotel Management Website</span>
+        <h1>DineLink OS</h1>
+        <p class="subtitle">
+          A full-stack hotel ordering and operations platform with QR menu
+          ordering, role-based dashboards, cash/online payment flow, customer
+          order tracking, and special event booking.
+        </p>
+        <div class="meta">
+          <div class="card">
+            <strong>Frontend</strong>
+            React, Vite, Tailwind-style utility UI, Framer Motion
+          </div>
+          <div class="card">
+            <strong>Backend</strong>
+            Node.js, Express, MongoDB, JWT, Socket.IO
+          </div>
+          <div class="card">
+            <strong>Users</strong>
+            Customer, Admin, Service Staff, Kitchen Staff
+          </div>
+        </div>
+      </section>
+
+      <section class="content">
+        <h2>1. Project Overview</h2>
+        <p>
+          DineLink OS is designed for hotels that want a modern digital
+          ordering system without losing staff control. Customers can scan a QR
+          code, browse the menu, add items to cart, pay online or choose cash,
+          and track order history. Staff members manage orders, rooms, kitchen
+          preparation, customers, payments, and special event requests.
+        </p>
+
+        <h2>2. Problem Solved</h2>
+        <div class="grid">
+          <div class="card">
+            <strong>Slow manual ordering</strong>
+            QR ordering reduces wait time and makes room context clear.
+          </div>
+          <div class="card">
+            <strong>Payment confusion</strong>
+            Online and cash flows are separated, with cash code confirmation.
+          </div>
+          <div class="card">
+            <strong>Kitchen coordination</strong>
+            Live dashboards show pending, accepted, preparing, and served orders.
+          </div>
+          <div class="card">
+            <strong>Event planning</strong>
+            Customers can request birthday or party bookings with preferences.
+          </div>
+        </div>
+
+        <h2>3. Main Features</h2>
+        <h3>Customer Features</h3>
+        <p>
+          Customers can register, login, open a QR-linked menu, add menu items,
+          choose online or cash payment, track order history, and submit special
+          event requirements.
+        </p>
+        <span class="pill">QR menu</span>
+        <span class="pill">Cart</span>
+        <span class="pill">Cash code</span>
+        <span class="pill">My Orders</span>
+        <span class="pill">Special Events</span>
+
+        <h3>Admin Features</h3>
+        <p>
+          Admins can manage menu items, categories, orders, customers, staff,
+          rooms, cash payments, and special event requests. Admins can
+          search a cash code and confirm payment, which then confirms the order.
+        </p>
+        <span class="pill">Dashboard</span>
+        <span class="pill">Orders</span>
+        <span class="pill">Payments</span>
+        <span class="pill">Events</span>
+        <span class="pill">Staff</span>
+        <span class="pill">Rooms</span>
+
+        <h3>Kitchen and Service Staff Features</h3>
+        <p>
+          Kitchen staff view live order queues and update preparation status.
+          Service Staffs handle service requests and can update active order statuses.
+        </p>
+
+        <h2 class="break">4. Payment Workflow</h2>
+        <div class="flow">
+          <div>Customer selects menu items and opens the cart.</div>
+          <div>Customer chooses either online payment or cash payment.</div>
+          <div>For online payment, the order is immediately marked paid.</div>
+          <div>
+            For cash payment, the system generates a unique code such as
+            CASH-402646.
+          </div>
+          <div>
+            Admin enters the code in the Payments panel and clicks Mark Paid.
+          </div>
+          <div>
+            After Mark Paid, the order becomes confirmed and enters the kitchen
+            flow.
+          </div>
+        </div>
+
+        <h2>5. Special Events Module</h2>
+        <p>
+          The Special Events module lets customers request birthdays,
+          anniversaries, office parties, family functions, or other events.
+          Customers can choose available hotel menu items, add custom food
+          requirements, select room or area preferences, choose decoration
+          setup options, and see an automatic estimated bill before submission.
+        </p>
+        <table>
+          <tr>
+            <th>Field</th>
+            <th>Purpose</th>
+          </tr>
+          <tr>
+            <td>Event Type</td>
+            <td>Birthday, anniversary, office party, family function, etc.</td>
+          </tr>
+          <tr>
+            <td>Guests and Date</td>
+            <td>Used for planning and automatic cost estimation.</td>
+          </tr>
+          <tr>
+            <td>Food Preferences</td>
+            <td>Selectable menu chips plus custom typed requirements.</td>
+          </tr>
+          <tr>
+            <td>Decoration Preferences</td>
+            <td>Selectable options such as cake setup, balloons, stage, music.</td>
+          </tr>
+          <tr>
+            <td>Room / Area</td>
+            <td>Customer can select a room or type a custom area request.</td>
+          </tr>
+          <tr>
+            <td>Estimated Bill</td>
+            <td>Auto-calculated based on guests, event type, and preferences.</td>
+          </tr>
+        </table>
+
+        <h2>6. Technical Architecture</h2>
+        <table>
+          <tr>
+            <th>Layer</th>
+            <th>Details</th>
+          </tr>
+          <tr>
+            <td>Frontend</td>
+            <td>
+              React app with protected routes, role-aware pages, cart context,
+              auth context, API service, and responsive UI components.
+            </td>
+          </tr>
+          <tr>
+            <td>Backend</td>
+            <td>
+              Express REST API with controllers, models, middleware, and routes
+              for auth, menu, orders, payments, events, rooms, staff, and
+              analytics.
+            </td>
+          </tr>
+          <tr>
+            <td>Database</td>
+            <td>
+              MongoDB collections for users, menu items, categories, orders,
+              rooms, service requests, and event bookings.
+            </td>
+          </tr>
+          <tr>
+            <td>Realtime</td>
+            <td>
+              Socket.IO emits order creation, status updates, service requests,
+              and payment completion updates.
+            </td>
+          </tr>
+        </table>
+
+        <h2>7. Security and Access Control</h2>
+        <p>
+          JWT authentication protects private routes. Role-based authorization
+          separates customer, admin, service staff, and kitchen access. Event booking
+          submission requires a customer login. Admin-only functions such as
+          staff management, payment confirmation, and event management are
+          protected.
+        </p>
+
+        <h2>8. Recommended Demo Flow</h2>
+        <div class="flow">
+          <div>Login as customer and open the menu.</div>
+          <div>Add items and choose cash payment.</div>
+          <div>Copy the generated cash code.</div>
+          <div>Login as admin and open Payments.</div>
+          <div>Search the cash code and click Mark Paid.</div>
+          <div>Open My Orders or Kitchen to see the confirmed order.</div>
+          <div>Open Special Events and submit a birthday or party request.</div>
+          <div>Admin reviews the request in the Events panel.</div>
+        </div>
+
+        <h2>9. Conclusion</h2>
+        <div class="highlight">
+          DineLink OS is a practical hotel management project covering
+          real guest ordering, staff operations, payment confirmation, and event
+          planning. It demonstrates both customer experience and hotel
+          back-office control in one connected system.
+        </div>
+        <p class="note">
+          This report is printable. Use the browser print option and choose
+          Save as PDF to share it as a PDF file.
+        </p>
+      </section>
+    </article>
+  </body>
+</html>

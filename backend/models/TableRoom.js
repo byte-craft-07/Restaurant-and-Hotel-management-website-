@@ -4,7 +4,8 @@ const tableRoomSchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: ["table", "room"],
+      enum: ["room"],
+      default: "room",
       required: true,
     },
 

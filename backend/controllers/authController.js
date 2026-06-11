@@ -1,5 +1,5 @@
 const sendTokenCookie = require("../utils/sendTokenCookie");
-const User = require("../models/User");
+const User = require("../models/user");
 const generateToken = require("../utils/generateToken");
 
 // @desc Register user

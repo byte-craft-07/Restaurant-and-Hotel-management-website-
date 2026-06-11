@@ -1,15 +1,65 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, ReceiptText, UserRound } from "lucide-react";
+import { ArrowLeft, Banknote, CreditCard, ReceiptText, UserRound } from "lucide-react";
 import api from "../../services/api";
+import { DEMO_KITCHEN_ORDERS_KEY } from "../../services/demoExperience";
+
+const getLocalOrders = () => {
+  try {
+    return JSON.parse(localStorage.getItem(DEMO_KITCHEN_ORDERS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+};
+
+const mergeOrders = (backendOrders, localOrders) => {
+  const orderMap = new Map();
+
+  [...backendOrders, ...localOrders].forEach((order) => {
+    if (order?._id) {
+      orderMap.set(order._id, order);
+    }
+  });
+
+  return Array.from(orderMap.values()).sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
+};
+
+const getOrderStatusLabel = (order) => {
+  if (order.status === "payment_pending") return "Awaiting payment";
+  if (order.paymentStatus === "paid" && order.status === "pending") {
+    return "Confirmed";
+  }
+
+  return order.status || "Confirmed";
+};
+
+const getOrderStatusStyle = (order) => {
+  if (order.status === "payment_pending") {
+    return "bg-amber-50 text-amber-700";
+  }
+
+  if (order.paymentStatus === "paid" && order.status === "pending") {
+    return "bg-green-50 text-green-700";
+  }
+
+  return "bg-orange-50 text-orange-600";
+};
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
 
   const fetchOrders = async () => {
-    const res = await api.get("/orders/my-orders");
-    setOrders(res.data.orders || []);
+    const localOrders = getLocalOrders();
+
+    try {
+      const res = await api.get("/orders/my-orders");
+      setOrders(mergeOrders(res.data.orders || [], localOrders));
+    } catch {
+      setOrders(localOrders);
+    }
   };
 
   useEffect(() => {
@@ -34,7 +84,7 @@ const MyOrders = () => {
             </div>
             <h1 className="text-4xl font-black text-slate-950">My Orders</h1>
             <p className="mt-2 text-slate-500">
-              Track your previous restaurant orders and applied offers.
+              Track your previous room-service orders and applied offers.
             </p>
           </div>
 
@@ -55,16 +105,40 @@ const MyOrders = () => {
               <div className="flex justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-black text-slate-950">
-                    {order.tableRoom?.type?.toUpperCase()}{" "}
-                    {order.tableRoom?.number}
+                    Room {order.tableRoom?.number}
                   </h2>
                   <p className="text-sm text-slate-500">
                     {new Date(order.createdAt).toLocaleString()}
                   </p>
                 </div>
 
-                <span className="h-fit rounded-full bg-orange-50 px-4 py-2 text-sm font-black text-orange-600">
-                  {order.status}
+                <span
+                  className={`h-fit rounded-full px-4 py-2 text-sm font-black ${getOrderStatusStyle(
+                    order
+                  )}`}
+                >
+                  {getOrderStatusLabel(order)}
+                </span>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-black capitalize text-slate-600">
+                  {order.paymentMethod === "cash" ? (
+                    <Banknote size={15} className="text-green-600" />
+                  ) : (
+                    <CreditCard size={15} className="text-blue-600" />
+                  )}
+                  {order.paymentMethod || "online"}
+                </span>
+
+                {order.cashCode && (
+                  <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-black text-green-700">
+                    {order.cashCode}
+                  </span>
+                )}
+
+                <span className="rounded-full bg-slate-50 px-3 py-1 text-xs font-black capitalize text-slate-600">
+                  {order.paymentStatus === "paid" ? "Paid" : "Pending cash"}
                 </span>
               </div>
 

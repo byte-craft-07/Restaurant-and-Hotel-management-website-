@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, QrCode, Table2, Trash2 } from "lucide-react";
+import { BedDouble, Download, QrCode, Trash2 } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { motion } from "framer-motion";
 import api from "../../services/api";
@@ -12,7 +12,7 @@ import {
 const TableRoomManagement = () => {
   const [tableRooms, setTableRooms] = useState([]);
   const [formData, setFormData] = useState({
-    type: "table",
+    type: "room",
     number: "",
     label: "",
   });
@@ -20,7 +20,7 @@ const TableRoomManagement = () => {
 
   const fetchTableRooms = async () => {
     try {
-      const res = await api.get("/table-rooms");
+      const res = await api.get("/rooms");
       setTableRooms(res.data.tableRooms || []);
     } catch {
       setTableRooms([]);
@@ -35,14 +35,14 @@ const TableRoomManagement = () => {
     e.preventDefault();
 
     if (!formData.number.trim()) {
-      setFormErrors({ number: "Table or room number is required." });
+      setFormErrors({ number: "Room number is required." });
       return;
     }
 
-    await api.post("/table-rooms", formData);
+    await api.post("/rooms", formData);
 
     setFormData({
-      type: "table",
+      type: "room",
       number: "",
       label: "",
     });
@@ -52,10 +52,10 @@ const TableRoomManagement = () => {
   };
 
   const deleteTableRoom = async (id) => {
-    const confirmDelete = window.confirm("Delete this table/room?");
+    const confirmDelete = window.confirm("Delete this room QR?");
     if (!confirmDelete) return;
 
-    await api.delete(`/table-rooms/${id}`);
+    await api.delete(`/rooms/${id}`);
     fetchTableRooms();
   };
 
@@ -79,12 +79,12 @@ const TableRoomManagement = () => {
     <div>
       <div className="mb-8">
         <div className="premium-label-pill mb-4">
-          <Table2 size={18} />
-          QR Table Manager
+          <BedDouble size={18} />
+          QR Room Manager
         </div>
-        <h1 className="text-4xl font-black text-slate-950">Tables & Rooms</h1>
+        <h1 className="text-4xl font-black text-slate-950">Hotel Rooms</h1>
         <p className="mt-2 text-slate-500">
-          Create tables/rooms and manage downloadable QR ordering cards.
+          Create room QR cards for in-room ordering and guest service.
         </p>
       </div>
 
@@ -94,16 +94,15 @@ const TableRoomManagement = () => {
         className="premium-card mb-8 p-6"
       >
         <h2 className="mb-5 text-2xl font-black text-slate-950">
-          Create Table / Room
+          Create Room QR
         </h2>
 
         <div className="grid gap-4 md:grid-cols-4">
           <SegmentedControl
             value={formData.type}
-            onChange={(value) => setFormData({ ...formData, type: value })}
+            onChange={() => setFormData({ ...formData, type: "room" })}
             options={[
-              { value: "table", label: "Table", icon: Table2 },
-              { value: "room", label: "Room", icon: QrCode },
+              { value: "room", label: "Room", icon: BedDouble },
             ]}
           />
 
@@ -114,7 +113,7 @@ const TableRoomManagement = () => {
                 setFormData({ ...formData, number: e.target.value });
                 setFormErrors((prev) => ({ ...prev, number: "" }));
               }}
-              placeholder="Number e.g. T1 / R101"
+              placeholder="Room number e.g. 101 / Suite 204"
               className={fieldClass(formErrors.number)}
               aria-invalid={Boolean(formErrors.number)}
             />
@@ -126,7 +125,7 @@ const TableRoomManagement = () => {
             onChange={(e) =>
               setFormData({ ...formData, label: e.target.value })
             }
-            placeholder="Label e.g. Near window"
+            placeholder="Label e.g. Deluxe King"
             className="premium-input w-full p-4"
           />
 
@@ -208,7 +207,7 @@ const TableRoomManagement = () => {
 
       {tableRooms.length === 0 && (
         <div className="premium-card mt-6 p-10 text-center text-slate-500">
-          No table or room created yet.
+          No room QR created yet.
         </div>
       )}
     </div>

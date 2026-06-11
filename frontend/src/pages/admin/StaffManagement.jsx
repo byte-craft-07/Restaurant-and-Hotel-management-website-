@@ -132,13 +132,13 @@ const StaffManagement = () => {
             Staff Management
           </h1>
           <p className="mt-2 text-slate-500">
-            Create waiter and kitchen login accounts from the admin panel.
+            Create room-service and kitchen login accounts from the admin panel.
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-[2rem] border border-white/80 bg-white/75 px-5 py-4 shadow-lg backdrop-blur-2xl">
-            <p className="text-xs font-bold text-slate-500">Waiters</p>
+            <p className="text-xs font-bold text-slate-500">Service Staff</p>
             <p className="text-3xl font-black text-orange-500">
               {waiterCount}
             </p>
@@ -172,7 +172,7 @@ const StaffManagement = () => {
               Create Staff Account
             </h2>
             <p className="text-sm text-slate-500">
-              Admin can issue official login details for waiter or kitchen use.
+              Admin can issue official login details for room-service or kitchen use.
             </p>
           </div>
 
@@ -206,7 +206,7 @@ const StaffManagement = () => {
           <div className="rounded-[1.4rem] border border-slate-200 bg-white p-1.5 shadow-sm">
             <div className="grid grid-cols-2 gap-1.5">
               {[
-                { value: "waiter", label: "Waiter", icon: UsersRound },
+                { value: "waiter", label: "Service Staff", icon: UsersRound },
                 { value: "kitchen", label: "Kitchen", icon: ChefHat },
               ].map((role) => {
                 const Icon = role.icon;
@@ -302,7 +302,7 @@ const StaffManagement = () => {
               Active Staff
             </h2>
             <p className="text-sm text-slate-500">
-              Login users with waiter or kitchen access.
+              Login users with room-service or kitchen access.
             </p>
           </div>
 
@@ -322,7 +322,7 @@ const StaffManagement = () => {
           </div>
         ) : staff.length === 0 ? (
           <div className="rounded-[2rem] border border-orange-100 bg-[#f8f6f2] p-10 text-center text-slate-500">
-            No waiter or kitchen staff created yet.
+            No room-service or kitchen staff created yet.
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

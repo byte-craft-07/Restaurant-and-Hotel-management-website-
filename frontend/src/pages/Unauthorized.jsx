@@ -34,8 +34,8 @@ const Unauthorized = () => {
 
         <p className="mx-auto mt-4 max-w-lg text-slate-500">
           {isCustomer
-            ? "Your customer account is ready, but this dashboard is only for admin, waiter, or kitchen staff."
-            : "You do not have permission to access this restaurant section."}
+            ? "Your guest account is ready, but this dashboard is only for admin, service, or kitchen staff."
+            : "You do not have permission to access this hotel section."}
         </p>
 
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">

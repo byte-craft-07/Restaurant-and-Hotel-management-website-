@@ -1,21 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Minus, Plus, ShieldCheck, ShoppingBag, Sparkles, Trash2, X } from "lucide-react";
+import {
+  Banknote,
+  CreditCard,
+  Minus,
+  Plus,
+  ShoppingBag,
+  Sparkles,
+  Trash2,
+  X,
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import api from "../services/api";
+import socket from "../services/socket";
 import { FieldError } from "./form/PremiumFields";
 import OrderSuccessPanel from "./order/OrderSuccessPanel";
 import {
   DEMO_KITCHEN_ORDERS_KEY,
-  DEMO_VERIFICATION_CODE,
   createDemoOrderFromCart,
   isDemoQrToken,
 } from "../services/demoExperience";
 
 const getFriendlyOrderError = (error) => {
   if (!error.response) {
-    return "The restaurant connection is taking a moment. Your cart is safe, please try again.";
+    return "The hotel service connection is taking a moment. Your cart is safe, please try again.";
   }
 
   return (
@@ -23,6 +32,20 @@ const getFriendlyOrderError = (error) => {
     "We could not place the order yet. Please check once and try again."
   );
 };
+
+const getStoredDemoOrders = () => {
+  try {
+    return JSON.parse(localStorage.getItem(DEMO_KITCHEN_ORDERS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+};
+
+const isSameOrder = (currentOrder, updatedOrder) =>
+  currentOrder?._id === updatedOrder?._id ||
+  (currentOrder?.cashCode &&
+    updatedOrder?.cashCode &&
+    currentOrder.cashCode === updatedOrder.cashCode);
 
 const CartDrawer = ({ open, onClose, tableContext }) => {
   const {
@@ -41,14 +64,72 @@ const CartDrawer = ({ open, onClose, tableContext }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [sessionId, setSessionId] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
-  const [needVerification, setNeedVerification] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [lastOrder, setLastOrder] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("online");
 
   const discountPercent = user?.discountPercent || 0;
   const discountAmount = Math.round((totalAmount * discountPercent) / 100);
   const finalAmount = totalAmount - discountAmount;
+
+  useEffect(() => {
+    const applyPaidUpdate = (updatedOrder) => {
+      if (!updatedOrder) return;
+
+      setLastOrder((currentOrder) => {
+        if (!isSameOrder(currentOrder, updatedOrder)) return currentOrder;
+
+        return {
+          ...currentOrder,
+          ...updatedOrder,
+          paymentStatus: "paid",
+          status:
+            updatedOrder.status ||
+            (currentOrder.status === "payment_pending"
+              ? "pending"
+              : currentOrder.status),
+        };
+      });
+    };
+
+    const handleLocalPaymentUpdate = (event) => {
+      applyPaidUpdate(event.detail);
+    };
+
+    const handleStorage = (event) => {
+      if (event.key !== DEMO_KITCHEN_ORDERS_KEY) return;
+
+      setLastOrder((currentOrder) => {
+        if (!currentOrder?.cashCode) return currentOrder;
+
+        const updatedOrder = getStoredDemoOrders().find((order) =>
+          isSameOrder(currentOrder, order)
+        );
+
+        if (!updatedOrder) return currentOrder;
+
+        return {
+          ...currentOrder,
+          ...updatedOrder,
+        };
+      });
+    };
+
+    socket.on("order_payment_updated", applyPaidUpdate);
+    socket.on("order_status_updated", applyPaidUpdate);
+    window.addEventListener("demo_payment_updated", handleLocalPaymentUpdate);
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      socket.off("order_payment_updated", applyPaidUpdate);
+      socket.off("order_status_updated", applyPaidUpdate);
+      window.removeEventListener(
+        "demo_payment_updated",
+        handleLocalPaymentUpdate
+      );
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, []);
 
   const placeOrder = async () => {
     if (cartItems.length === 0) {
@@ -67,110 +148,81 @@ const CartDrawer = ({ open, onClose, tableContext }) => {
 
       let activeSessionId = sessionId;
 
-      if (!needVerification && !activeSessionId) {
+      if (!activeSessionId) {
         const qrToken = localStorage.getItem("qrToken");
 
         if (!qrToken) {
-          setMessage("Please scan table QR first.");
+          setMessage("Please scan your room QR first.");
           return;
         }
 
         if (isDemoQrToken(qrToken)) {
           activeSessionId = `demo-session-${Date.now()}`;
           setSessionId(activeSessionId);
-          setNeedVerification(true);
-          setMessage(
-            `Demo verification generated. Use code ${DEMO_VERIFICATION_CODE} to place the order.`
-          );
-          return;
+        } else {
+          const cartPreview = cartItems.map((item) => ({
+            menuItem: item._id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+          }));
+
+          const scanRes = await api.get(`/rooms/scan/${qrToken}`, {
+            params: {
+              cartPreview: JSON.stringify(cartPreview),
+              numberOfPeople,
+              note,
+              totalAmount,
+            },
+          });
+
+          activeSessionId = scanRes.data.data.sessionId;
+          setSessionId(activeSessionId);
         }
-
-        const cartPreview = cartItems.map((item) => ({
-          menuItem: item._id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-        }));
-
-        const scanRes = await api.get(`/table-rooms/scan/${qrToken}`, {
-          params: {
-            cartPreview: JSON.stringify(cartPreview),
-            numberOfPeople,
-            note,
-            totalAmount,
-          },
-        });
-
-        activeSessionId = scanRes.data.data.sessionId;
-        setSessionId(activeSessionId);
-        setNeedVerification(true);
-
-        setMessage(
-          "Verification code generated. Ask waiter/admin for the code."
-        );
-        return;
       }
 
-      if (needVerification) {
-        if (!verificationCode) {
-          setFormErrors({
-            verificationCode: "Enter verification code first.",
-          });
-          return;
-        }
-
-        if (
-          activeSessionId?.startsWith("demo-session") &&
-          verificationCode !== DEMO_VERIFICATION_CODE
-        ) {
-          setFormErrors({
-            verificationCode: `Use demo code ${DEMO_VERIFICATION_CODE}.`,
-          });
-          return;
-        }
-
-        if (activeSessionId?.startsWith("demo-session")) {
-          const demoOrder = createDemoOrderFromCart({
-            cartItems,
-            numberOfPeople,
-            note,
-            totalAmount: finalAmount,
-            tableContext,
-          });
-
-          const savedOrders = JSON.parse(
-            localStorage.getItem(DEMO_KITCHEN_ORDERS_KEY) || "[]"
-          );
-
-          localStorage.setItem(
-            DEMO_KITCHEN_ORDERS_KEY,
-            JSON.stringify([demoOrder, ...savedOrders].slice(0, 8))
-          );
-          window.dispatchEvent(
-            new CustomEvent("demo_order_created", { detail: demoOrder })
-          );
-
-          clearCart();
-          setSessionId("");
-          setVerificationCode("");
-          setNeedVerification(false);
-          setMessage("");
-          setLastOrder(demoOrder);
-          return;
-        }
-
-        await api.post("/table-rooms/verify", {
-          sessionId: activeSessionId,
-          verificationCode,
+      if (activeSessionId?.startsWith("demo-session")) {
+        const demoOrder = createDemoOrderFromCart({
+          cartItems,
+          numberOfPeople,
+          note,
+          totalAmount: finalAmount,
+          tableContext,
         });
+        demoOrder.paymentMethod = paymentMethod;
+        demoOrder.paymentStatus =
+          paymentMethod === "cash" ? "pending_cash" : "paid";
+        demoOrder.status =
+          paymentMethod === "cash" ? "payment_pending" : "pending";
+        demoOrder.cashCode =
+          paymentMethod === "cash"
+            ? `CASH-${Math.floor(100000 + Math.random() * 900000)}`
+            : undefined;
 
-        setNeedVerification(false);
+        const savedOrders = JSON.parse(
+          localStorage.getItem(DEMO_KITCHEN_ORDERS_KEY) || "[]"
+        );
+
+        localStorage.setItem(
+          DEMO_KITCHEN_ORDERS_KEY,
+          JSON.stringify([demoOrder, ...savedOrders].slice(0, 8))
+        );
+        window.dispatchEvent(
+          new CustomEvent("demo_order_created", { detail: demoOrder })
+        );
+
+        clearCart();
+        setSessionId("");
+        setMessage("");
+        setLastOrder(demoOrder);
+        return;
       }
 
       const payload = {
         sessionId: activeSessionId,
         numberOfPeople,
         note,
+        paymentMethod,
         tableContext: tableContext
           ? {
               type: tableContext.type,
@@ -202,8 +254,7 @@ const CartDrawer = ({ open, onClose, tableContext }) => {
 
       clearCart();
       setSessionId("");
-      setVerificationCode("");
-      setNeedVerification(false);
+      setPaymentMethod("online");
       setMessage(res.data.message || "");
       setLastOrder(successOrder);
     } catch (error) {
@@ -240,7 +291,7 @@ const CartDrawer = ({ open, onClose, tableContext }) => {
                 <p className="text-sm text-slate-500">
                   {lastOrder
                     ? "Track the service flow in real time."
-                    : "Review and verify your order."}
+                    : "Review your room-service order."}
                 </p>
               </div>
 
@@ -376,38 +427,6 @@ const CartDrawer = ({ open, onClose, tableContext }) => {
                 placeholder="Special note e.g. less spicy"
               />
 
-              {needVerification && (
-                <div className="space-y-3 rounded-[2rem] border border-orange-200 bg-orange-50 p-5">
-                  <div className="flex items-center gap-2 font-black text-orange-600">
-                    <ShieldCheck />
-                    Verification Required
-                  </div>
-
-                  <p className="text-sm text-slate-600">
-                    Ask the waiter/admin for your 6-digit verification code.
-                  </p>
-
-                  <input
-                    value={verificationCode}
-                    onChange={(e) => {
-                      setVerificationCode(e.target.value);
-                      setFormErrors((prev) => ({
-                        ...prev,
-                        verificationCode: "",
-                      }));
-                    }}
-                    placeholder="Enter 6-digit code"
-                    className={`w-full rounded-2xl border bg-white p-4 outline-none focus:ring-4 focus:ring-orange-100 ${
-                      formErrors.verificationCode
-                        ? "border-red-200 bg-red-50/60"
-                        : "border-orange-200"
-                    }`}
-                    aria-invalid={Boolean(formErrors.verificationCode)}
-                  />
-                  <FieldError>{formErrors.verificationCode}</FieldError>
-                </div>
-              )}
-
               <div className="space-y-3 rounded-[2rem] border border-white bg-white/85 p-5 shadow-lg">
                 <div className="flex justify-between text-slate-600">
                   <span>Subtotal</span>
@@ -433,6 +452,52 @@ const CartDrawer = ({ open, onClose, tableContext }) => {
                 )}
               </div>
 
+              <div className="space-y-3 rounded-[2rem] border border-white bg-white/85 p-5 shadow-lg">
+                <div>
+                  <h3 className="font-black text-slate-900">
+                    Payment before order
+                  </h3>
+                  <p className="text-sm text-slate-500">
+                    Pay online now, or choose cash and show the generated code
+                    at the hotel counter.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("online")}
+                    className={`rounded-2xl border p-4 text-left transition ${
+                      paymentMethod === "online"
+                        ? "border-orange-300 bg-orange-50 text-orange-600"
+                        : "border-slate-200 bg-white text-slate-600"
+                    }`}
+                  >
+                    <CreditCard className="mb-2" size={22} />
+                    <span className="block font-black">Online</span>
+                    <span className="text-xs font-semibold">
+                      Simulated paid
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("cash")}
+                    className={`rounded-2xl border p-4 text-left transition ${
+                      paymentMethod === "cash"
+                        ? "border-green-300 bg-green-50 text-green-700"
+                        : "border-slate-200 bg-white text-slate-600"
+                    }`}
+                  >
+                    <Banknote className="mb-2" size={22} />
+                    <span className="block font-black">Cash</span>
+                    <span className="text-xs font-semibold">
+                      Code at counter
+                    </span>
+                  </button>
+                </div>
+              </div>
+
               {message && (
                 <p className="rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-700">
                   {message}
@@ -446,9 +511,9 @@ const CartDrawer = ({ open, onClose, tableContext }) => {
               >
                 {loading
                   ? "Processing..."
-                  : needVerification
-                  ? "Verify & Place Order"
-                  : "Place Order"}
+                  : paymentMethod === "cash"
+                  ? "Generate Cash Code"
+                  : "Pay Online & Place Order"}
               </button>
             </div>
               </>

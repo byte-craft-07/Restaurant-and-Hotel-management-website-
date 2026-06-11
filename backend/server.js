@@ -13,6 +13,7 @@ const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const serviceRequestRoutes = require("./routes/serviceRequestRoutes");
+const eventBookingRoutes = require("./routes/eventBookingRoutes");
 
 
 dotenv.config();
@@ -42,16 +43,18 @@ app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/table-rooms", tableRoomRoutes);
+app.use("/api/rooms", tableRoomRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/api/users", userRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/service-requests", serviceRequestRoutes);
+app.use("/api/event-bookings", eventBookingRoutes);
 
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "Restaurant Ordering Backend is running",
+    message: "Hotel Room Service Backend is running",
   });
 });
 

@@ -1,17 +1,16 @@
 import { Link } from "react-router-dom";
 import {
   motion,
-  useMotionTemplate,
-  useMotionValue,
-  useSpring,
-  useTransform,
 } from "framer-motion";
 import {
   ArrowRight,
   BarChart3,
   Bot,
+  CalendarDays,
   ChefHat,
   ClipboardList,
+  Gift,
+  PartyPopper,
   MonitorPlay,
   QrCode,
   ScanLine,
@@ -20,16 +19,15 @@ import {
   WandSparkles,
 } from "lucide-react";
 import BrandLogo from "../components/BrandLogo";
-import FloatingFoodScene from "../components/FloatingFoodScene";
 import PremiumHoverCard from "../components/motion/PremiumHoverCard";
 import RestaurantBrandPanel from "../components/restaurant/RestaurantBrandPanel";
 import { DEMO_QR_TOKEN } from "../services/demoExperience";
 
 const features = [
   {
-    title: "QR Table Ordering",
+    title: "QR Room Ordering",
     description:
-      "Guests scan, sign in, browse the menu, and place verified table orders without staff confusion.",
+      "Guests scan the room QR, browse the menu, and place verified room-service orders without staff confusion.",
     icon: QrCode,
   },
   {
@@ -41,13 +39,13 @@ const features = [
   {
     title: "Live Kitchen Display",
     description:
-      "Kitchen teams see pending, accepted, and preparing orders in a clean real-time queue.",
+      "Kitchen teams see room-wise pending, accepted, and preparing orders in a clean real-time queue.",
     icon: ChefHat,
   },
   {
-    title: "Waiter Operations",
+    title: "Hotel Staff Operations",
     description:
-      "Waiters verify table codes, monitor service requests, and update order status from one focused screen.",
+      "Service staff verify room requests, monitor guest calls, and update order status from one focused screen.",
     icon: ClipboardList,
   },
 ];
@@ -61,7 +59,7 @@ const stats = [
 const workflowSteps = [
   {
     title: "Scan QR",
-    description: "Guest lands on the table-aware digital menu.",
+    description: "Guest lands on the room-aware digital menu.",
     icon: ScanLine,
   },
   {
@@ -71,12 +69,12 @@ const workflowSteps = [
   },
   {
     title: "Place Order",
-    description: "Verification keeps table orders secure and staff-aware.",
+    description: "QR room sessions keep orders simple and staff-aware.",
     icon: ShieldCheck,
   },
   {
     title: "Kitchen Live",
-    description: "Orders move instantly to kitchen and waiter operations.",
+    description: "Orders move instantly to kitchen and hotel service operations.",
     icon: MonitorPlay,
   },
 ];
@@ -88,40 +86,21 @@ const aiPreviewPrompts = [
 ];
 
 const Landing = () => {
-  const mouseX = useMotionValue(0.5);
-  const mouseY = useMotionValue(0.5);
-  const rotateX = useSpring(useTransform(mouseY, [0, 1], [7, -7]), {
-    stiffness: 120,
-    damping: 18,
-  });
-  const rotateY = useSpring(useTransform(mouseX, [0, 1], [-9, 9]), {
-    stiffness: 120,
-    damping: 18,
-  });
-  const glowX = useTransform(mouseX, (value) => `${value * 100}%`);
-  const glowY = useTransform(mouseY, (value) => `${value * 100}%`);
-  const cursorGlow = useMotionTemplate`radial-gradient(circle at ${glowX} ${glowY}, rgba(251, 146, 60, 0.28), transparent 36%)`;
-
-  const handleScenePointerMove = (event) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    mouseX.set((event.clientX - rect.left) / rect.width);
-    mouseY.set((event.clientY - rect.top) / rect.height);
-  };
-
-  const resetScenePointer = () => {
-    mouseX.set(0.5);
-    mouseY.set(0.5);
-  };
-
   return (
     <div className="safe-page min-h-screen overflow-hidden bg-[#f8f6f2] text-slate-900">
       <header className="fixed inset-x-0 top-0 z-40 border-b border-white/50 bg-[#f8f6f2]/75 backdrop-blur-2xl">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <Link to="/" className="flex items-center gap-3">
-            <BrandLogo size="sm" subtitle="Restaurant SaaS" />
+            <BrandLogo size="sm" subtitle="Hotel OS" />
           </Link>
 
           <div className="flex items-center gap-3">
+            <Link
+              to="/events"
+              className="hidden rounded-2xl border border-pink-200 bg-pink-50 px-4 py-2 text-sm font-semibold text-pink-700 shadow-sm transition hover:border-pink-300 hover:bg-pink-100 md:inline-flex"
+            >
+              Special Events
+            </Link>
             <Link
               to="/login"
               className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-orange-200 hover:text-orange-600"
@@ -149,20 +128,21 @@ const Landing = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-[#f8f6f2] via-[#f8f6f2]/88 to-[#f8f6f2]/38" />
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(248,246,242,0.2),rgba(248,246,242,0.95))]" />
 
-        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 px-4 pb-16 pt-28 md:gap-14 md:px-6 md:pb-24 lg:min-h-[92vh] lg:grid-cols-[0.98fr_1.02fr]">
+        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 px-4 pb-16 pt-28 md:gap-14 md:px-6 md:pb-24 lg:min-h-[92vh]">
           <div className="max-w-3xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white/70 px-4 py-2 text-sm font-semibold text-orange-600 backdrop-blur-xl">
               <Sparkles size={16} />
-              AI-powered QR ordering for modern restaurants
+              AI-powered QR room service for modern hotels
             </div>
 
             <h1 className="max-w-3xl text-4xl font-black leading-tight text-slate-950 sm:text-5xl md:text-7xl">
-              Ultra-fast QR ordering with an AI menu concierge.
+              Ultra-fast room service with an AI menu concierge.
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 md:text-xl">
-              Guests scan, type what they want, and DineLink converts real menu
-              intent into cart actions while staff and kitchen teams stay live.
+              Guests scan from their room, type what they want, and DineLink
+              converts menu intent into cart actions while hotel staff and
+              kitchen teams stay live.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -170,7 +150,7 @@ const Landing = () => {
                 to={`/qr/${DEMO_QR_TOKEN}`}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-orange-500 px-6 py-4 font-bold text-white shadow-xl shadow-orange-500/20 transition hover:bg-orange-600"
               >
-                Simulate QR Scan
+                Simulate Room QR
                 <ArrowRight size={18} />
               </Link>
               <Link
@@ -183,9 +163,16 @@ const Landing = () => {
                 to="/login"
                 className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white/60 px-6 py-4 font-bold text-slate-700 shadow-sm backdrop-blur-xl transition hover:border-orange-200 hover:text-orange-600"
               >
-                Staff Login
-              </Link>
-            </div>
+                Hotel Staff Login
+            </Link>
+            <Link
+              to="/events"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-pink-200 bg-pink-50 px-6 py-4 font-bold text-pink-700 shadow-sm backdrop-blur-xl transition hover:border-pink-300 hover:bg-pink-100"
+            >
+              Plan Special Event
+              <PartyPopper size={18} />
+            </Link>
+          </div>
 
             <div className="mt-12 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-3">
               {stats.map((item) => (
@@ -202,47 +189,101 @@ const Landing = () => {
             </div>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            onMouseMove={handleScenePointerMove}
-            onMouseLeave={resetScenePointer}
-            style={{
-              rotateX,
-              rotateY,
-              transformPerspective: 1200,
-              transformStyle: "preserve-3d",
-            }}
-            className="relative min-h-[360px] rounded-[2rem] border border-white/70 bg-white/60 p-4 shadow-2xl backdrop-blur-2xl md:min-h-[440px] md:p-6 lg:min-h-[540px]"
-          >
-            <div className="absolute inset-x-8 bottom-14 h-24 bg-orange-300/30 blur-3xl" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#ffffff_0,transparent_58%)] opacity-80" />
-            <motion.div
-              className="pointer-events-none absolute inset-0 opacity-90"
-              style={{ background: cursorGlow }}
-            />
+        </div>
+      </section>
 
-            <FloatingFoodScene className="h-[320px] w-full md:h-[420px] lg:h-[540px]" />
+      <section className="relative overflow-hidden border-b border-pink-100 bg-white/45">
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-20"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=2200&q=85')",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#f8f6f2] via-[#f8f6f2]/92 to-[#f8f6f2]/70" />
 
-            <motion.div
-              animate={{ y: [0, -12, 0] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="absolute left-8 top-14 border border-orange-100 bg-white/80 p-4 shadow-lg shadow-slate-900/5 backdrop-blur-2xl"
-            >
-              <p className="text-sm text-slate-500">Live Table</p>
-              <h3 className="text-3xl font-black text-orange-500">T1</h3>
-            </motion.div>
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-8 px-5 py-16 md:py-20 lg:grid-cols-[1fr_0.85fr] lg:items-center">
+          <div>
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white/80 px-4 py-2 text-sm font-black text-pink-700 shadow-sm backdrop-blur-xl">
+              <PartyPopper size={18} />
+              Birthdays, parties and private celebrations
+            </div>
 
-            <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 4, repeat: Infinity }}
-              className="absolute bottom-14 right-8 border border-orange-100 bg-white/80 p-4 shadow-lg shadow-slate-900/5 backdrop-blur-2xl"
-            >
-              <p className="text-sm text-slate-500">Order Status</p>
-              <h3 className="text-xl font-bold text-green-600">Preparing</h3>
-            </motion.div>
-          </motion.div>
+            <h2 className="max-w-3xl text-4xl font-black leading-tight text-slate-950 md:text-6xl">
+              Plan special events with custom food, decor and service.
+            </h2>
+
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
+              Customers can request birthdays, anniversaries, family functions
+              or office parties with guest count, budget, menu preferences,
+              decoration choices and special instructions.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link
+                to="/events"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-pink-600 px-6 py-4 font-black text-white shadow-xl shadow-pink-500/20 transition hover:bg-pink-700"
+              >
+                Customize Event
+                <ArrowRight size={18} />
+              </Link>
+              <Link
+                to="/login?redirect=/events"
+                className="inline-flex items-center justify-center rounded-2xl border border-pink-200 bg-white/80 px-6 py-4 font-black text-pink-700 shadow-sm backdrop-blur-xl transition hover:bg-pink-50"
+              >
+                Login to Request
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[
+              {
+                title: "Birthday Setups",
+                copy: "Cake setup, balloons, music, kids menu and family seating.",
+                icon: Gift,
+              },
+              {
+                title: "Custom Menu",
+                copy: "Starters, main course, desserts, drinks and veg/non-veg choices.",
+                icon: ChefHat,
+              },
+              {
+                title: "Guest Planning",
+                copy: "Guest count, budget range, contact phone and preferred date.",
+                icon: CalendarDays,
+              },
+              {
+                title: "Admin Follow-up",
+                copy: "Requests reach admin panel for status updates and planning notes.",
+                icon: ClipboardList,
+              },
+            ].map((item, index) => {
+              const Icon = item.icon;
+
+              return (
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ delay: index * 0.07 }}
+                  whileHover={{ y: -7, scale: 1.01 }}
+                  className="rounded-[2rem] border border-white/80 bg-white/80 p-5 shadow-xl shadow-pink-100/50 backdrop-blur-2xl"
+                >
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-pink-50 text-pink-600">
+                    <Icon size={22} />
+                  </div>
+                  <h3 className="text-xl font-black text-slate-950">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    {item.copy}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -252,7 +293,7 @@ const Landing = () => {
             Complete Flow
           </p>
           <h2 className="text-4xl font-bold text-slate-950">
-            Built for real restaurant service.
+            Built for real hotel room service.
           </h2>
           <p className="mt-4 text-lg text-slate-600">
             Every screen is designed for fast staff action and a smoother guest
@@ -310,7 +351,7 @@ const Landing = () => {
               Live Demo Flow
             </div>
             <h2 className="text-3xl font-black text-slate-950">
-              From QR scan to kitchen queue in one smooth story.
+              From room QR scan to kitchen queue in one smooth story.
             </h2>
             <p className="mt-4 leading-7 text-slate-600">
               Built for hackathon demos: every step explains itself visually,
@@ -417,20 +458,20 @@ const Landing = () => {
           <div>
             <div className="premium-label-pill mb-5">
               <ShieldCheck size={18} />
-              Restaurant Branding
+              Hotel Branding
             </div>
             <h2 className="text-3xl font-black text-slate-950 md:text-4xl">
-              The guest experience feels like the restaurant, not a template.
+              The guest experience feels like the hotel, not a template.
             </h2>
             <p className="mt-4 leading-7 text-slate-600">
-              Venue name, logo mark, cuisine tags, status, banner imagery, and
-              table context can shape the interface while DineLink keeps the
+              Hotel name, logo mark, service tags, status, banner imagery, and
+              room context can shape the interface while DineLink keeps the
               premium product consistency.
             </p>
           </div>
 
           <RestaurantBrandPanel
-            tableContext={{ type: "table", number: "4" }}
+            tableContext={{ type: "room", number: "204" }}
           />
         </section>
 
@@ -483,12 +524,12 @@ const Landing = () => {
 
           <PremiumHoverCard className="p-6" intensity={7}>
             <p className="text-sm font-semibold text-orange-500">
-              Kitchen Queue
+              Room Service Queue
             </p>
             <h3 className="mt-1 text-2xl font-bold">Live service view</h3>
 
             <div className="mt-6 space-y-3">
-              {["Table T4", "Room R101", "Table T7"].map((label, index) => (
+              {["Room 204", "Room 101", "Suite 307"].map((label, index) => (
                 <motion.div
                   key={label}
                   whileHover={{ x: 8, backgroundColor: "#fff7ed" }}

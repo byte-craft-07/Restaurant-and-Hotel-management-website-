@@ -41,10 +41,10 @@ const QrEntry = () => {
         </div>
 
         <h1 className="text-3xl font-black text-slate-950">
-          Opening restaurant menu
+          Opening hotel room-service menu
         </h1>
         <p className="mt-3 text-slate-500">
-          Your table QR is being linked to this dining session.
+          Your room QR is being linked to this guest session.
         </p>
 
         <BrandLogo

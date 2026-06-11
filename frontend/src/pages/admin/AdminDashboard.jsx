@@ -109,7 +109,7 @@ const AdminDashboard = () => {
           <div>
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-orange-100 bg-orange-50 px-4 py-2 text-sm font-bold text-orange-600">
               <Sparkles size={17} />
-              Live Restaurant Analytics
+              Live Hotel Analytics
             </div>
 
             <h1 className="text-4xl font-black text-slate-950">

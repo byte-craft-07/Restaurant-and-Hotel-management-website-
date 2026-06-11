@@ -23,11 +23,11 @@ router.get("/admin-only", protect, authorizeRoles("admin"), (req, res) => {
   });
 });
 
-// test waiter route
+// test service staff route
 router.get("/waiter-only", protect, authorizeRoles("waiter", "admin"), (req, res) => {
   res.json({
     success: true,
-    message: "Welcome Waiter/Admin",
+    message: "Welcome Service Staff/Admin",
   });
 });
 

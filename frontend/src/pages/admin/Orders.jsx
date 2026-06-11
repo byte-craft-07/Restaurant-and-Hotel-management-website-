@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   BellRing,
+  Banknote,
   CheckCircle,
   Clock,
   CookingPot,
+  CreditCard,
   ReceiptText,
-  ShieldCheck,
   XCircle,
 } from "lucide-react";
 import socket from "../../services/socket";
@@ -14,7 +15,6 @@ import api from "../../services/api";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
-  const [pendingSessions, setPendingSessions] = useState([]);
   const [serviceRequests, setServiceRequests] = useState([]);
   const [error, setError] = useState("");
 
@@ -24,17 +24,6 @@ const Orders = () => {
       setOrders(res.data.orders || []);
     } catch (err) {
       setError(err.response?.data?.message || "Unable to load orders.");
-    }
-  };
-
-  const fetchPendingSessions = async () => {
-    try {
-      const res = await api.get("/table-rooms/verification/pending");
-      setPendingSessions(res.data.sessions || []);
-    } catch (err) {
-      setError(
-        err.response?.data?.message || "Unable to load verification codes."
-      );
     }
   };
 
@@ -84,21 +73,10 @@ const Orders = () => {
 
   useEffect(() => {
     fetchOrders();
-    fetchPendingSessions();
     fetchServiceRequests();
 
     socket.on("new_order", (order) => {
       setOrders((prev) => [order, ...prev]);
-
-      if (order.session) {
-        setPendingSessions((prev) =>
-          prev.filter((session) => session._id !== order.session)
-        );
-      }
-    });
-
-    socket.on("verification_code_created", (session) => {
-      setPendingSessions((prev) => [session, ...prev]);
     });
 
     socket.on("order_status_updated", (updatedOrder) => {
@@ -133,27 +111,17 @@ const Orders = () => {
 
     return () => {
       socket.off("new_order");
-      socket.off("verification_code_created");
       socket.off("order_status_updated");
       socket.off("service_request_created");
       socket.off("service_request_updated");
     };
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPendingSessions((prev) =>
-        prev.filter((session) => new Date(session.expiresAt) > new Date())
-      );
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   const getStatusStyle = (status) => {
     const styles = {
       accepted: "bg-purple-50 text-purple-600 border-purple-100",
       cancelled: "bg-red-50 text-red-600 border-red-100",
+      payment_pending: "bg-amber-50 text-amber-700 border-amber-100",
       pending: "bg-blue-50 text-blue-600 border-blue-100",
       preparing: "bg-yellow-50 text-yellow-600 border-yellow-100",
       served: "bg-green-50 text-green-600 border-green-100",
@@ -174,7 +142,7 @@ const Orders = () => {
 
         <h1 className="text-4xl font-black text-slate-950">Orders</h1>
         <p className="mt-2 text-slate-500">
-          Manage live orders, verification codes and service flow.
+          Manage live orders, payments and service flow.
         </p>
       </div>
 
@@ -183,92 +151,6 @@ const Orders = () => {
           {error}
         </div>
       )}
-
-      <section className="mb-8 rounded-[2rem] border border-white/80 bg-white/75 p-6 shadow-xl backdrop-blur-2xl">
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-black text-slate-950">
-              Pending Verification Codes
-            </h2>
-            <p className="text-sm text-slate-500">
-              Give these codes to customers after checking table/room request.
-            </p>
-          </div>
-
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-500">
-            <ShieldCheck />
-          </div>
-        </div>
-
-        {pendingSessions.length === 0 ? (
-          <div className="rounded-[2rem] border border-orange-100 bg-[#f8f6f2] p-8 text-center text-slate-500">
-            No pending verification requests.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
-            {pendingSessions.map((session) => (
-              <motion.div
-                key={session._id}
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -4, scale: 1.01 }}
-                className="rounded-[2rem] border border-orange-100 bg-[#f8f6f2] p-5 shadow-sm"
-              >
-                <div className="flex justify-between gap-3">
-                  <div>
-                    <p className="font-black text-orange-500">
-                      {session.tableRoom?.type?.toUpperCase()}{" "}
-                      {session.tableRoom?.number}
-                    </p>
-
-                    <p className="text-sm text-slate-500">
-                      {session.customer?.name || "Customer"} |{" "}
-                      {session.customer?.phone || "No phone"}
-                    </p>
-                  </div>
-
-                  <span className="h-fit rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-600">
-                    Active
-                  </span>
-                </div>
-
-                <p className="mt-5 text-5xl font-black tracking-widest text-slate-900">
-                  {session.verificationCode}
-                </p>
-
-                <p className="mt-1 text-xs text-slate-500">
-                  Ask customer to enter this code.
-                </p>
-
-                <div className="mt-5 space-y-2">
-                  {session.cartPreview?.map((item, index) => (
-                    <div
-                      key={`${item.menuItem || item.name}-${index}`}
-                      className="flex justify-between rounded-2xl border border-white bg-white p-3 text-sm"
-                    >
-                      <span className="font-semibold">{item.name}</span>
-                      <span className="font-bold text-orange-500">
-                        Rs. {item.price} x {item.quantity}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-4 flex justify-between font-black text-orange-500">
-                  <span>Total</span>
-                  <span>Rs. {session.totalAmount}</span>
-                </div>
-
-                {session.note && (
-                  <p className="mt-3 rounded-2xl border border-white bg-white p-3 text-sm text-slate-600">
-                    Note: {session.note}
-                  </p>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </section>
 
       <section className="mb-8 rounded-[2rem] border border-white/80 bg-white/75 p-6 shadow-xl backdrop-blur-2xl">
         <div className="mb-5 flex items-center justify-between gap-4">
@@ -304,8 +186,7 @@ const Orders = () => {
                 <div className="flex justify-between gap-3">
                   <div>
                     <p className="font-black text-amber-600">
-                      {request.tableRoom?.type?.toUpperCase()}{" "}
-                      {request.tableRoom?.number}
+                      Room {request.tableRoom?.number}
                     </p>
                     <p className="text-sm text-slate-500">
                       {request.customer?.name || "Guest"} |{" "}
@@ -319,7 +200,7 @@ const Orders = () => {
                 </div>
 
                 <p className="mt-4 rounded-2xl border border-white bg-white p-3 text-sm font-semibold text-slate-700">
-                  {request.note || "Guest requested waiter assistance."}
+                  {request.note || "Guest requested hotel service assistance."}
                 </p>
 
                 <div className="mt-4 flex flex-col gap-2 sm:flex-row">
@@ -359,8 +240,7 @@ const Orders = () => {
             <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
               <div>
                 <h2 className="text-2xl font-black text-slate-900">
-                  {order.tableRoom?.type?.toUpperCase()}{" "}
-                  {order.tableRoom?.number}
+                  Room {order.tableRoom?.number}
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-500">
@@ -370,6 +250,18 @@ const Orders = () => {
 
                 <p className="text-sm text-slate-500">
                   People: {order.numberOfPeople}
+                </p>
+
+                <p className="mt-2 flex w-fit items-center gap-2 rounded-full border border-white bg-white px-3 py-1 text-xs font-black capitalize text-slate-600">
+                  {order.paymentMethod === "cash" ? (
+                    <Banknote size={15} className="text-green-600" />
+                  ) : (
+                    <CreditCard size={15} className="text-blue-600" />
+                  )}
+                  {order.paymentMethod || "online"} |{" "}
+                  {order.paymentStatus === "paid"
+                    ? "Paid"
+                    : `Pending ${order.cashCode || ""}`}
                 </p>
               </div>
 

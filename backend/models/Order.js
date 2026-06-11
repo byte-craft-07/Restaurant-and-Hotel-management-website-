@@ -49,7 +49,14 @@ const orderSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "accepted", "preparing", "served", "cancelled"],
+      enum: [
+        "payment_pending",
+        "pending",
+        "accepted",
+        "preparing",
+        "served",
+        "cancelled",
+      ],
       default: "pending",
     },
 
@@ -71,6 +78,28 @@ const orderSchema = new mongoose.Schema(
     finalAmount: {
       type: Number,
       required: true,
+    },
+
+    paymentMethod: {
+      type: String,
+      enum: ["online", "cash"],
+      default: "online",
+    },
+
+    paymentStatus: {
+      type: String,
+      enum: ["paid", "pending_cash", "failed"],
+      default: "paid",
+    },
+
+    cashCode: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+
+    paidAt: {
+      type: Date,
     },
   },
 

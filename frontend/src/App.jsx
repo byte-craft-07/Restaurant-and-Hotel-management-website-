@@ -19,10 +19,12 @@ import WaiterDashboard from "./pages/waiter/WaiterDashboard";
 import Customers from "./pages/admin/Customers";
 import MyOrders from "./pages/customer/MyOrders";
 import CustomerProfile from "./pages/customer/CustomerProfile";
+import SpecialEvents from "./pages/customer/SpecialEvents";
 import CustomerDetails from "./pages/admin/CustomerDetails";
 import NotFound from "./pages/NotFound";
 import StaffManagement from "./pages/admin/StaffManagement";
-
+import Payments from "./pages/admin/Payments";
+import EventBookings from "./pages/admin/EventBookings";
 
 function App() {
   return (
@@ -36,6 +38,14 @@ function App() {
        
        <Route
   path="/waiter/orders"
+  element={
+    <ProtectedRoute allowedRoles={["waiter", "admin"]}>
+      <WaiterDashboard />
+    </ProtectedRoute>
+  }
+/>
+       <Route
+  path="/service/orders"
   element={
     <ProtectedRoute allowedRoles={["waiter", "admin"]}>
       <WaiterDashboard />
@@ -78,8 +88,12 @@ function App() {
   <Route path="menu/add" element={<AddMenuItem />} />
   <Route path="menu/edit/:id" element={<EditMenuItem />} />
   <Route path="orders" element={<Orders />} />
+  <Route path="payments" element={<Payments />} />
+  <Route path="events" element={<EventBookings />} />
   <Route path="waiter" element={<WaiterDashboard />} />
   <Route path="waiter/orders" element={<WaiterDashboard />} />
+  <Route path="service" element={<WaiterDashboard />} />
+  <Route path="service/orders" element={<WaiterDashboard />} />
   <Route path="kitchen" element={<KitchenDashboard />} />
   <Route path="tables" element={<TableRoomManagement />} />
   <Route index element={<AdminDashboard />} />
@@ -93,6 +107,15 @@ function App() {
   element={
     <ProtectedRoute allowedRoles={["customer", "admin"]}>
       <MyOrders />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/events"
+  element={
+    <ProtectedRoute allowedRoles={["customer"]}>
+      <SpecialEvents />
     </ProtectedRoute>
   }
 />
