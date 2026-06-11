@@ -21,20 +21,40 @@ connectDB();
 
 const app = express();
 const server = http.createServer(app);
-const CLIENT_URL =
-  process.env.CLIENT_URL || process.env.FRONTEND_URL || "http://localhost:5173";
+
+const parseOrigins = (...values) =>
+  values
+    .flatMap((value) => (value || "").split(","))
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+const allowedOrigins = parseOrigins(
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  process.env.CORS_ORIGINS,
+  "http://localhost:5173"
+);
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
+};
 
 const io = new Server(server, {
   cors: {
-    origin: CLIENT_URL,
+    origin: allowedOrigins,
     credentials: true,
   },
 });
 
-app.use(cors({
-  origin: CLIENT_URL,
-  credentials: true,
-}));
+app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -55,6 +75,15 @@ app.get("/", (req, res) => {
   res.json({
     success: true,
     message: "Hotel Room Service Backend is running",
+  });
+});
+
+app.get("/api/health", (req, res) => {
+  res.json({
+    success: true,
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
   });
 });
 
