@@ -14,6 +14,7 @@ import BrandLogo from "../../components/BrandLogo";
 import { FieldError } from "../../components/form/PremiumFields";
 import { getCustomerRedirect } from "../../utils/authRedirect";
 import { getAuthErrorMessage } from "../../utils/apiErrors";
+import { API_BASE_URL } from "../../services/api";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -157,7 +158,10 @@ const Register = () => {
 
             {error && (
               <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-600">
-                {error}
+                <p>{error}</p>
+                <p className="mt-2 break-all text-xs font-semibold text-red-500">
+                  API: {API_BASE_URL}
+                </p>
               </div>
             )}
 
