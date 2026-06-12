@@ -13,6 +13,7 @@ import { useAuth } from "../../context/AuthContext";
 import BrandLogo from "../../components/BrandLogo";
 import { FieldError } from "../../components/form/PremiumFields";
 import { getCustomerRedirect } from "../../utils/authRedirect";
+import { getAuthErrorMessage } from "../../utils/apiErrors";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -77,7 +78,7 @@ const Register = () => {
 
       navigate(customerRedirect);
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+      setError(getAuthErrorMessage(err, "Registration failed"));
     }
   };
 

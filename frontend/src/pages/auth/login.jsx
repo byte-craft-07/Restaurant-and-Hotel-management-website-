@@ -6,6 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import BrandLogo from "../../components/BrandLogo";
 import { FieldError } from "../../components/form/PremiumFields";
 import { getCustomerRedirect, getRoleRedirect } from "../../utils/authRedirect";
+import { getAuthErrorMessage } from "../../utils/apiErrors";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -66,7 +67,7 @@ const Login = () => {
 
       navigate(getRoleRedirect(data.user.role, redirect));
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      setError(getAuthErrorMessage(err, "Login failed"));
     }
   };
 
