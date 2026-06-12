@@ -1,20 +1,35 @@
 const mongoose = require("mongoose");
 
+let connectionPromise;
+
 const connectDB = async () => {
-  try {
-    const mongoUrl = process.env.ATLASDB_URL;
+  const mongoUrl = process.env.ATLASDB_URL;
 
-    if (!mongoUrl) {
-      throw new Error("ATLASDB_URL is missing in backend/.env");
-    }
-
-    const conn = await mongoose.connect(mongoUrl);
-
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`MongoDB Error: ${error.message}`);
-    process.exit(1);
+  if (!mongoUrl) {
+    throw new Error(
+      "ATLASDB_URL is missing. Add it in Vercel Environment Variables or backend/.env."
+    );
   }
+
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+
+  if (!connectionPromise) {
+    connectionPromise = mongoose
+      .connect(mongoUrl)
+      .then((conn) => {
+        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        return conn.connection;
+      })
+      .catch((error) => {
+        connectionPromise = null;
+        console.error(`MongoDB Error: ${error.message}`);
+        throw error;
+      });
+  }
+
+  return connectionPromise;
 };
 
 module.exports = connectDB;

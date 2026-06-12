@@ -18,8 +18,6 @@ const eventBookingRoutes = require("./routes/eventBookingRoutes");
 dotenv.config({ path: path.join(__dirname, ".env") });
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
-connectDB();
-
 const app = express();
 
 const parseOrigins = (...values) =>
@@ -52,6 +50,52 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.get("/api/health", async (req, res) => {
+  try {
+    const connection = await connectDB();
+
+    res.json({
+      success: true,
+      status: "ok",
+      database: "connected",
+      host: connection.host,
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      status: "db_error",
+      database: "not_connected",
+      message: error.message,
+      env: {
+        hasAtlasDbUrl: Boolean(process.env.ATLASDB_URL),
+      },
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+app.use("/api", async (req, res, next) => {
+  if (req.path === "/health") {
+    next();
+    return;
+  }
+
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      env: {
+        hasAtlasDbUrl: Boolean(process.env.ATLASDB_URL),
+      },
+    });
+  }
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/menu", menuRoutes);
@@ -63,15 +107,6 @@ app.use("/api/users", userRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/service-requests", serviceRequestRoutes);
 app.use("/api/event-bookings", eventBookingRoutes);
-
-app.get("/api/health", (req, res) => {
-  res.json({
-    success: true,
-    status: "ok",
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-  });
-});
 
 const frontendDistPath =
   process.env.FRONTEND_DIST_PATH || path.join(__dirname, "..", "frontend", "dist");
