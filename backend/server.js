@@ -7,6 +7,8 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const http = require("http");
+const fs = require("fs");
+const path = require("path");
 const { Server } = require("socket.io");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
@@ -15,7 +17,7 @@ const analyticsRoutes = require("./routes/analyticsRoutes");
 const serviceRequestRoutes = require("./routes/serviceRequestRoutes");
 const eventBookingRoutes = require("./routes/eventBookingRoutes");
 
-
+dotenv.config({ path: path.join(__dirname, ".env") });
 dotenv.config();
 connectDB();
 
@@ -65,18 +67,11 @@ app.use("/api/menu", menuRoutes);
 app.use("/api/table-rooms", tableRoomRoutes);
 app.use("/api/rooms", tableRoomRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/users", userRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/service-requests", serviceRequestRoutes);
 app.use("/api/event-bookings", eventBookingRoutes);
-
-app.get("/", (req, res) => {
-  res.json({
-    success: true,
-    message: "Hotel Room Service Backend is running",
-  });
-});
 
 app.get("/api/health", (req, res) => {
   res.json({
@@ -86,6 +81,31 @@ app.get("/api/health", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+const frontendDistPath =
+  process.env.FRONTEND_DIST_PATH || path.join(__dirname, "..", "frontend", "dist");
+const frontendIndexPath = path.join(frontendDistPath, "index.html");
+
+if (fs.existsSync(frontendIndexPath)) {
+  app.use(express.static(frontendDistPath));
+
+  app.use((req, res, next) => {
+    if (req.path.startsWith("/api") || req.path.startsWith("/uploads")) {
+      next();
+      return;
+    }
+
+    res.sendFile(frontendIndexPath);
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.json({
+      success: true,
+      message: "Hotel Room Service Backend is running",
+      frontend: "Run npm run build from the project root to serve the frontend.",
+    });
+  });
+}
 
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);

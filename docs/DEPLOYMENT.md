@@ -6,6 +6,31 @@ This project is arranged for a split deployment:
 - Backend: Render, Railway, Fly.io, or any Node.js hosting service
 - Database: MongoDB Atlas
 
+It can also run as a single Node app from the repository root. In that mode,
+the backend serves the built frontend from `frontend/dist`.
+
+## Single App Deployment
+
+Recommended service settings for Render/Railway:
+
+```text
+Root directory: .
+Build command: npm run build
+Start command: npm start
+Health check path: /api/health
+```
+
+Environment variables:
+
+```env
+ATLASDB_URL=your_mongodb_atlas_connection_string
+JWT_SECRET=replace_with_a_long_random_secret
+NODE_ENV=production
+```
+
+For this mode, `VITE_API_URL` and `VITE_SOCKET_URL` can be left empty because
+the frontend uses the same deployed origin.
+
 ## Backend
 
 Recommended service settings:

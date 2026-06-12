@@ -208,14 +208,44 @@ JWT_SECRET=your_jwt_secret
 FRONTEND_URL=http://localhost:5173
 ```
 
-Run backend:
+Install and run the full app from the project root:
+
+```bash
+cd restaurant-ordering-system
+npm install
+npm run dev
+```
+
+This starts both services:
+
+```text
+Backend:  http://localhost:5000
+Frontend: http://localhost:5173
+```
+
+Build and run as one production app:
+
+```bash
+npm run build
+npm start
+```
+
+In production mode, the backend serves the built frontend from `frontend/dist`.
+
+Health check:
+
+```text
+http://localhost:5000/api/health
+```
+
+Advanced separate backend command:
 
 ```bash
 cd backend
 npm run dev
 ```
 
-Run frontend:
+Advanced separate frontend command:
 
 ```bash
 cd frontend
