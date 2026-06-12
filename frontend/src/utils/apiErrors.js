@@ -13,5 +13,15 @@ export const getAuthErrorMessage = (error, fallback) => {
     return `Backend API is not reachable. Check VITE_API_URL: ${API_BASE_URL}`;
   }
 
-  return fallback;
+  const status = error.response.status;
+
+  if (status === 404) {
+    return `Backend auth route not found. Check VITE_API_URL: ${API_BASE_URL}`;
+  }
+
+  if (status >= 500) {
+    return `Backend server error ${status}. Check backend logs and ATLASDB_URL.`;
+  }
+
+  return `${fallback}. Backend returned status ${status}.`;
 };
