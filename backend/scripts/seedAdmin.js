@@ -6,11 +6,13 @@ dotenv.config();
 
 const seedAdmin = async () => {
   try {
-    if (!process.env.MONGO_URI) {
-      throw new Error("MONGO_URI is missing in backend/.env");
+    const mongoUrl = process.env.ATLASDB_URL;
+
+    if (!mongoUrl) {
+      throw new Error("ATLASDB_URL is missing in backend/.env");
     }
 
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(mongoUrl);
 
     const email = process.env.ADMIN_EMAIL || "admin@restro.com";
     const phone = process.env.ADMIN_PHONE || "9999999999";

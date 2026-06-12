@@ -171,7 +171,7 @@ Use [backend/.env.example](backend/.env.example):
 
 ```env
 PORT=5000
-MONGO_URI=mongodb://127.0.0.1:27017/dinelink-os
+ATLASDB_URL=mongodb+srv://username:password@cluster.mongodb.net/dinelink-os?retryWrites=true&w=majority
 JWT_SECRET=replace_this_with_a_long_random_secret
 CLIENT_URL=http://localhost:5173
 FRONTEND_URL=http://localhost:5173
@@ -203,7 +203,7 @@ Typical values:
 
 ```env
 PORT=5000
-MONGO_URI=your_mongodb_connection_string
+ATLASDB_URL=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 FRONTEND_URL=http://localhost:5173
 ```

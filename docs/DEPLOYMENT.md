@@ -21,7 +21,7 @@ Environment variables:
 
 ```env
 PORT=5000
-MONGO_URI=your_mongodb_atlas_connection_string
+ATLASDB_URL=your_mongodb_atlas_connection_string
 JWT_SECRET=replace_with_a_long_random_secret
 CLIENT_URL=https://your-frontend-domain.vercel.app
 FRONTEND_URL=https://your-frontend-domain.vercel.app

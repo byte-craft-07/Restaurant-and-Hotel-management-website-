@@ -2,7 +2,13 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
+    const mongoUrl = process.env.ATLASDB_URL;
+
+    if (!mongoUrl) {
+      throw new Error("ATLASDB_URL is missing in backend/.env");
+    }
+
+    const conn = await mongoose.connect(mongoUrl);
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {

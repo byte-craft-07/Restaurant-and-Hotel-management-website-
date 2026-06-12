@@ -4,11 +4,15 @@
   "version": "1.0.0",
   "description": "Deployment wrapper for the DineLink OS hotel room-service app",
   "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
     "install:frontend": "npm install --prefix frontend",
     "build": "npm run build --prefix frontend",
     "start": "npm run start --prefix frontend"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
