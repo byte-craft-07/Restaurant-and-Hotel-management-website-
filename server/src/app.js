@@ -29,13 +29,26 @@ const parseOrigins = (...values) =>
 const allowedOrigins = parseOrigins(
   process.env.CLIENT_URL,
   process.env.FRONTEND_URL,
+  process.env.RENDER_EXTERNAL_URL,
   process.env.CORS_ORIGINS,
   "http://localhost:5173"
 );
 
+const isAllowedOrigin = (origin = "") => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === "localhost" || hostname.endsWith(".onrender.com");
+  } catch {
+    return false;
+  }
+};
+
 const corsOptions = {
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (isAllowedOrigin(origin)) {
       callback(null, true);
       return;
     }
