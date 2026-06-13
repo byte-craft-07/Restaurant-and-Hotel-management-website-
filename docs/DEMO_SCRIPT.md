@@ -5,14 +5,14 @@
 Run:
 
 ```bash
-cd frontend
+cd client
 npm run dev
 ```
 
 Optional backend:
 
 ```bash
-cd backend
+cd server
 npm run dev
 ```
 
@@ -150,7 +150,7 @@ Say:
 
 ## Backup Plan
 
-If backend/API is unavailable:
+If server/API is unavailable:
 
 - Use `http://localhost:5173/qr/demo-room-101`
 - The app loads sample menu data
@@ -167,3 +167,4 @@ If backend/API is unavailable:
 - Cart verification
 - Success timeline
 - Kitchen status update
+

@@ -89,3 +89,4 @@ Hotels are already comfortable with QR menus, but customers expect better experi
 
 The project includes demo fallback behavior. If the backend database is empty or unavailable, the app still shows sample menu items, AI ordering, order success, and kitchen demo activity.
 
+

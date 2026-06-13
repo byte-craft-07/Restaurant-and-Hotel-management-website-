@@ -7,7 +7,7 @@ const connectDB = async () => {
 
   if (!mongoUrl) {
     throw new Error(
-      "ATLASDB_URL is missing. Add it in Vercel Environment Variables or backend/.env."
+      "ATLASDB_URL is missing. Add it in Vercel Environment Variables or server/.env."
     );
   }
 

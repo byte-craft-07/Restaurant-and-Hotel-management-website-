@@ -7,10 +7,10 @@ const {
   deleteMenuItem,
 } = require("../controllers/menuController");
 
-const { protect, authorizeRoles } = require("../middleware/authMiddleware");
+const { protect, authorizeRoles } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
-const upload = require("../middleware/uploadMiddleware");
+const upload = require("../middlewares/uploadMiddleware");
 router.get("/", getMenuItems);
 
 router.get("/:id", getSingleMenuItem);

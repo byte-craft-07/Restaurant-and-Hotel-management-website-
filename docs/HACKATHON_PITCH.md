@@ -81,3 +81,4 @@ Hotels are used to QR menus after the last few years, but customers now expect b
 - PWA offline mode
 - Kitchen prep-time prediction
 - Owner analytics and revenue insights
+

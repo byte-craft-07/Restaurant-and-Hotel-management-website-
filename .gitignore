@@ -1,27 +1,27 @@
 # Dependencies
 node_modules/
-frontend/node_modules/
-backend/node_modules/
+client/node_modules/
+server/node_modules/
 
 # Environment files - never commit real secrets
 .env
 .env.*
 !.env.example
-frontend/.env
-frontend/.env.*
-!frontend/.env.example
-backend/.env
-backend/.env.*
-!backend/.env.example
+client/.env
+client/.env.*
+!client/.env.example
+server/.env
+server/.env.*
+!server/.env.example
 
 # Build output
 dist/
-frontend/dist/
-backend/dist/
+client/dist/
+server/dist/
 build/
 
 # Runtime uploads and generated files
-backend/uploads/
+server/uploads/
 uploads/
 
 # Local API scratch files can contain test credentials

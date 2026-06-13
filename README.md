@@ -98,7 +98,7 @@ This makes the product feel venue-aware rather than generic.
 ## Architecture Overview
 
 ```text
-frontend/
+client/
   src/
     components/
       order/                 Order success and timeline UI
@@ -114,12 +114,17 @@ frontend/
       restaurantBranding.js  Hotel branding configuration
       api.js                 Axios API client
 
-backend/
-  controllers/
-  models/
-  routes/
-  middleware/
-  server.js
+server/
+  src/
+    app.js                  Express app configuration
+    server.js               Local/Node server entry
+    config/                 Database and environment configuration
+    controllers/            Request handlers
+    middlewares/            Auth and upload middleware
+    models/                 Mongoose models
+    routes/                 API route definitions
+    seeders/                Admin/data seed scripts
+    utils/                  Shared backend helpers
 ```
 
 ## AI Feature Explanation
@@ -149,10 +154,10 @@ VITE_AI_ORDER_ENDPOINT=https://your-ai-endpoint.example.com/order-assistant
 Frontend env file:
 
 ```text
-frontend/.env
+client/.env
 ```
 
-Use [frontend/.env.example](frontend/.env.example):
+Use [client/.env.example](client/.env.example):
 
 ```env
 VITE_API_URL=http://localhost:5000/api
@@ -164,10 +169,10 @@ VITE_ENABLE_DEMO_MODE=true
 Backend env file:
 
 ```text
-backend/.env
+server/.env
 ```
 
-Use [backend/.env.example](backend/.env.example):
+Use [server/.env.example](server/.env.example):
 
 ```env
 PORT=5000
@@ -182,21 +187,21 @@ Never commit real secrets.
 Install frontend dependencies:
 
 ```bash
-cd frontend
+cd client
 npm install
 ```
 
 Install backend dependencies:
 
 ```bash
-cd backend
+cd server
 npm install
 ```
 
 Create backend environment file:
 
 ```text
-backend/.env
+server/.env
 ```
 
 Typical values:
@@ -230,7 +235,7 @@ npm run build
 npm start
 ```
 
-In production mode, the backend serves the built frontend from `frontend/dist`.
+In production mode, the backend serves the built frontend from `client/dist`.
 
 Health check:
 
@@ -241,14 +246,14 @@ http://localhost:5000/api/health
 Advanced separate backend command:
 
 ```bash
-cd backend
+cd server
 npm run dev
 ```
 
 Advanced separate frontend command:
 
 ```bash
-cd frontend
+cd client
 npm run dev
 ```
 
@@ -361,3 +366,4 @@ This project is designed to be judged as a complete experience:
 - Kitchen prep-time prediction
 - Manager-level business insights
 - Theme studio for hotel owners
+

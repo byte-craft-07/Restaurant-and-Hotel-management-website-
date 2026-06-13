@@ -1,4 +1,4 @@
-const app = require("../backend/app");
+const app = require("../server/src/app");
 
 module.exports = (req, res) => {
   const pathParam = req.query?.path;

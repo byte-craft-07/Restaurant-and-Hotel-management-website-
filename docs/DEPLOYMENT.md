@@ -7,7 +7,7 @@ This project is arranged for a split deployment:
 - Database: MongoDB Atlas
 
 It can also run as a single Node app from the repository root. In that mode,
-the backend serves the built frontend from `frontend/dist`.
+the backend serves the built frontend from `client/dist`.
 
 ## Single App Deployment
 
@@ -36,7 +36,7 @@ the frontend uses the same deployed origin.
 Recommended service settings:
 
 ```text
-Root directory: backend
+Root directory: server
 Build command: npm install
 Start command: npm start
 Health check path: /api/health
@@ -64,7 +64,7 @@ https://your-backend-domain/api/health
 Recommended service settings:
 
 ```text
-Root directory: frontend
+Root directory: client
 Build command: npm install && npm run build
 Output directory: dist
 ```
@@ -78,7 +78,7 @@ VITE_AI_ORDER_ENDPOINT=
 VITE_ENABLE_DEMO_MODE=true
 ```
 
-The `frontend/vercel.json` file is included so direct links like `/login`,
+The `client/vercel.json` file is included so direct links like `/login`,
 `/admin`, `/menu`, and `/service/orders` work after refresh on Vercel.
 
 ## Notes
@@ -88,3 +88,4 @@ The `frontend/vercel.json` file is included so direct links like `/login`,
 - File uploads are stored on the backend filesystem. On platforms with ephemeral
   disks, uploaded images may reset after redeploys. For permanent uploads, move
   images to Cloudinary, S3, or another object storage provider.
+

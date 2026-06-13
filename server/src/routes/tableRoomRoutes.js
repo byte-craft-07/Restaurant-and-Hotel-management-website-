@@ -9,7 +9,7 @@ const {
   deleteTableRoom,
 } = require("../controllers/tableRoomController");
 
-const { protect, authorizeRoles } = require("../middleware/authMiddleware");
+const { protect, authorizeRoles } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 

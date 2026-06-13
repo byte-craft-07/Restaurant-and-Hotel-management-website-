@@ -15,8 +15,8 @@ const analyticsRoutes = require("./routes/analyticsRoutes");
 const serviceRequestRoutes = require("./routes/serviceRequestRoutes");
 const eventBookingRoutes = require("./routes/eventBookingRoutes");
 
-dotenv.config({ path: path.join(__dirname, ".env") });
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
+dotenv.config({ path: path.join(__dirname, "..", "..", ".env") });
 
 const app = express();
 
@@ -102,14 +102,14 @@ app.use("/api/menu", menuRoutes);
 app.use("/api/table-rooms", tableRoomRoutes);
 app.use("/api/rooms", tableRoomRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use("/api/users", userRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/service-requests", serviceRequestRoutes);
 app.use("/api/event-bookings", eventBookingRoutes);
 
 const frontendDistPath =
-  process.env.FRONTEND_DIST_PATH || path.join(__dirname, "..", "frontend", "dist");
+  process.env.FRONTEND_DIST_PATH || path.join(__dirname, "..", "..", "client", "dist");
 const frontendIndexPath = path.join(frontendDistPath, "index.html");
 
 if (fs.existsSync(frontendIndexPath)) {

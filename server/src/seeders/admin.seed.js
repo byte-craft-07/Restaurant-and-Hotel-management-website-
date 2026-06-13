@@ -9,7 +9,7 @@ const seedAdmin = async () => {
     const mongoUrl = process.env.ATLASDB_URL;
 
     if (!mongoUrl) {
-      throw new Error("ATLASDB_URL is missing in backend/.env");
+      throw new Error("ATLASDB_URL is missing in server/.env");
     }
 
     await mongoose.connect(mongoUrl);
