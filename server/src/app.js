@@ -102,7 +102,12 @@ app.use("/api/menu", menuRoutes);
 app.use("/api/table-rooms", tableRoomRoutes);
 app.use("/api/rooms", tableRoomRoutes);
 app.use("/api/orders", orderRoutes);
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+const uploadsDir =
+  process.env.VERCEL === "1"
+    ? path.join("/tmp", "uploads")
+    : path.join(process.cwd(), "uploads");
+
+app.use("/uploads", express.static(uploadsDir));
 app.use("/api/users", userRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/service-requests", serviceRequestRoutes);
