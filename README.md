@@ -160,8 +160,8 @@ client/.env
 Use [client/.env.example](client/.env.example):
 
 ```env
-VITE_API_URL=http://localhost:5000/api
-VITE_SOCKET_URL=http://localhost:5000
+VITE_API_URL=https://restaurant-and-hotel-management-website.onrender.com/api
+VITE_SOCKET_URL=https://restaurant-and-hotel-management-website.onrender.com
 VITE_AI_ORDER_ENDPOINT=
 VITE_ENABLE_DEMO_MODE=true
 ```
