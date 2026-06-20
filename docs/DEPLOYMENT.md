@@ -1,17 +1,12 @@
 # Deployment Guide
 
-This project is arranged for a split deployment:
-
-- Frontend: Vercel, Netlify, or any static hosting service
-- Backend: Render, Railway, Fly.io, or any Node.js hosting service
-- Database: MongoDB Atlas
-
-It can also run as a single Node app from the repository root. In that mode,
-the backend serves the built frontend from `client/dist`.
+This project is configured as one Render web service with MongoDB Atlas. The
+Express backend serves the built React frontend from `client/dist`, so the
+frontend and API stay on the same Render domain.
 
 ## Single App Deployment
 
-Recommended service settings for Render/Railway:
+Render service settings:
 
 ```text
 Root directory: .
@@ -28,58 +23,23 @@ JWT_SECRET=replace_with_a_long_random_secret
 NODE_ENV=production
 ```
 
-For this mode, `VITE_API_URL` and `VITE_SOCKET_URL` can be left empty because
-the frontend uses the same deployed origin.
-
-## Backend
-
-Recommended service settings:
-
-```text
-Root directory: server
-Build command: npm install
-Start command: npm start
-Health check path: /api/health
-```
-
-Environment variables:
-
-```env
-PORT=5000
-ATLASDB_URL=your_mongodb_atlas_connection_string
-JWT_SECRET=replace_with_a_long_random_secret
-CLIENT_URL=https://your-frontend-domain.vercel.app
-FRONTEND_URL=https://your-frontend-domain.vercel.app
-CORS_ORIGINS=https://your-frontend-domain.vercel.app
-```
+Render provides `PORT` and `RENDER_EXTERNAL_URL` automatically. The production
+frontend defaults to the Render API URL configured in `client/src/services/api.js`.
 
 After deploying the backend, test:
 
 ```text
-https://your-backend-domain/api/health
+https://restaurant-and-hotel-management-website.onrender.com/api/health
 ```
 
-## Frontend
-
-Recommended service settings:
-
-```text
-Root directory: client
-Build command: npm install && npm run build
-Output directory: dist
-```
-
-Environment variables:
+Optional frontend build variables:
 
 ```env
-VITE_API_URL=https://your-backend-domain/api
-VITE_SOCKET_URL=https://your-backend-domain
+VITE_API_URL=https://restaurant-and-hotel-management-website.onrender.com/api
+VITE_SOCKET_URL=https://restaurant-and-hotel-management-website.onrender.com
 VITE_AI_ORDER_ENDPOINT=
 VITE_ENABLE_DEMO_MODE=true
 ```
-
-The `client/vercel.json` file is included so direct links like `/login`,
-`/admin`, `/menu`, and `/service/orders` work after refresh on Vercel.
 
 ## Notes
 

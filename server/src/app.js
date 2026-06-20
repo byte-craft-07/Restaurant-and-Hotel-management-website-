@@ -33,8 +33,6 @@ const allowedOrigins = parseOrigins(
   process.env.FRONTEND_URL,
   process.env.RENDER_EXTERNAL_URL,
   process.env.CORS_ORIGINS,
-  "https://restaurant-and-hotel-management-web.vercel.app",
-  "https://restaurant-and-hotel-management-website-byte-craft.vercel.app",
   "http://localhost:5173"
 );
 
@@ -47,9 +45,7 @@ const isAllowedOrigin = (origin = "") => {
     return (
       hostname === "localhost" ||
       hostname === "127.0.0.1" ||
-      hostname.endsWith(".onrender.com") ||
-      (hostname.startsWith("restaurant-and-hotel-management-") &&
-        hostname.endsWith("-byte-craft.vercel.app"))
+      hostname.endsWith(".onrender.com")
     );
   } catch {
     return false;
@@ -127,10 +123,7 @@ app.use("/api/rooms", tableRoomRoutes);
 app.use("/api/hotel-rooms", hotelRoomRoutes);
 app.use("/api/room-bookings", roomBookingRoutes);
 app.use("/api/orders", orderRoutes);
-const uploadsDir =
-  process.env.VERCEL === "1"
-    ? path.join("/tmp", "uploads")
-    : path.join(process.cwd(), "uploads");
+const uploadsDir = path.join(process.cwd(), "uploads");
 
 app.use("/uploads", express.static(uploadsDir));
 app.use("/api/users", userRoutes);
