@@ -6,6 +6,7 @@ const eventBookingSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
     eventType: {
       type: String,
@@ -55,6 +56,19 @@ const eventBookingSchema = new mongoose.Schema(
       enum: ["new", "contacted", "planning", "confirmed", "cancelled"],
       default: "new",
     },
+    statusHistory: [
+      {
+        status: {
+          type: String,
+          enum: ["new", "contacted", "planning", "confirmed", "cancelled"],
+          required: true,
+        },
+        changedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     adminNote: {
       type: String,
       default: "",

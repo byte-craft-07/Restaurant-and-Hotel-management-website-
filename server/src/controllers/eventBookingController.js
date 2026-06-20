@@ -34,6 +34,7 @@ const createEventBooking = async (req, res) => {
       decorationPreferences,
       specialRequests,
       contactPhone: contactPhone || req.user.phone || "",
+      statusHistory: [{ status: "new" }],
     });
 
     const fullBooking = await EventBooking.findById(booking._id)
@@ -94,20 +95,30 @@ const updateEventBooking = async (req, res) => {
   try {
     const { status, adminNote } = req.body;
 
-    const booking = await EventBooking.findByIdAndUpdate(
-      req.params.id,
-      { status, adminNote },
-      { new: true, runValidators: true }
-    ).populate("customer", "name email phone");
+    const existingBooking = await EventBooking.findById(req.params.id);
 
-    await booking.populate("tableRoom", "type number label");
-
-    if (!booking) {
+    if (!existingBooking) {
       return res.status(404).json({
         success: false,
         message: "Event request not found",
       });
     }
+
+    const update = { status, adminNote };
+
+    if (status && existingBooking.status !== status) {
+      update.$push = {
+        statusHistory: { status, changedAt: new Date() },
+      };
+    }
+
+    const booking = await EventBooking.findByIdAndUpdate(
+      req.params.id,
+      update,
+      { new: true, runValidators: true }
+    )
+      .populate("customer", "name email phone")
+      .populate("tableRoom", "type number label");
 
     res.json({
       success: true,

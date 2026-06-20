@@ -17,43 +17,47 @@ const createOrder = async (req, res) => {
   try {
     const { sessionId, items, numberOfPeople, note, paymentMethod } = req.body;
 
-    if (!sessionId || !items || items.length === 0) {
+    if (!items || items.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Session ID and order items are required",
+        message: "Order items are required",
       });
     }
 
-    const session = await VerificationSession.findById(sessionId).populate(
-      "tableRoom"
-    );
+    let session = null;
 
-    if (!session) {
-      return res.status(404).json({
-        success: false,
-        message: "Session not found",
-      });
-    }
+    if (sessionId) {
+      session = await VerificationSession.findById(sessionId).populate(
+        "tableRoom"
+      );
 
-    if (!session.isVerified) {
-      return res.status(403).json({
-        success: false,
-        message: "Session is not verified",
-      });
-    }
+      if (!session) {
+        return res.status(404).json({
+          success: false,
+          message: "Session not found",
+        });
+      }
 
-    if (session.expiresAt < new Date()) {
-      return res.status(400).json({
-        success: false,
-        message: "Session expired",
-      });
-    }
+      if (!session.isVerified) {
+        return res.status(403).json({
+          success: false,
+          message: "Session is not verified",
+        });
+      }
 
-    if (session.isUsed) {
-      return res.status(400).json({
-        success: false,
-        message: "Session already used",
-      });
+      if (session.expiresAt < new Date()) {
+        return res.status(400).json({
+          success: false,
+          message: "Session expired",
+        });
+      }
+
+      if (session.isUsed) {
+        return res.status(400).json({
+          success: false,
+          message: "Session already used",
+        });
+      }
     }
 
     let orderItems = [];
@@ -111,8 +115,8 @@ const createOrder = async (req, res) => {
 
     const order = await Order.create({
       customer: req.user._id,
-      tableRoom: session.tableRoom._id,
-      session: session._id,
+      tableRoom: session?.tableRoom?._id || null,
+      session: session?._id || null,
       items: orderItems,
       numberOfPeople,
       totalAmount,
@@ -134,8 +138,10 @@ const createOrder = async (req, res) => {
       },
     });
 
-    session.isUsed = true;
-    await session.save();
+    if (session) {
+      session.isUsed = true;
+      await session.save();
+    }
 
     const fullOrder = await Order.findById(order._id)
       .populate("customer", "name phone email")

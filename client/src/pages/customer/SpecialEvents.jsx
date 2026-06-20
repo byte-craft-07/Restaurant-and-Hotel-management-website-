@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import AccountChip from "../../components/AccountChip";
+import PageNavigation from "../../components/PageNavigation";
 
 const eventTypeOptions = [
   "Birthday",
@@ -128,10 +130,14 @@ const SpecialEvents = () => {
   };
 
   useEffect(() => {
-    fetchBookings();
+    if (user?.role === "customer") {
+      fetchBookings();
+    } else {
+      setBookings([]);
+    }
     fetchTables();
     fetchMenuItems();
-  }, []);
+  }, [user]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -231,7 +237,10 @@ const SpecialEvents = () => {
       });
       setMessage(res.data.message || "Event request submitted.");
       setFormData(initialForm);
-      fetchBookings();
+      navigate(`/bookings?tab=events&booking=${res.data.booking._id}`, {
+        replace: true,
+        state: { message: "Event request submitted successfully." },
+      });
     } catch (err) {
       setError(err.response?.data?.message || "Unable to submit event request.");
     } finally {
@@ -242,10 +251,14 @@ const SpecialEvents = () => {
   return (
     <div className="min-h-screen bg-[#f8f6f2] p-4 text-slate-900 md:p-8">
       <div className="mx-auto max-w-6xl space-y-8">
+        <PageNavigation />
         <section className="rounded-[2rem] border border-white/80 bg-white/75 p-7 shadow-xl backdrop-blur-2xl">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-pink-100 bg-pink-50 px-4 py-2 font-bold text-pink-600">
-            <PartyPopper size={18} />
-            Special Events
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-pink-100 bg-pink-50 px-4 py-2 font-bold text-pink-600">
+              <PartyPopper size={18} />
+              Special Events
+            </div>
+            <AccountChip />
           </div>
           <h1 className="text-4xl font-black text-slate-950">
             Customize your celebration
@@ -699,7 +712,17 @@ const SpecialEvents = () => {
             </div>
 
             <div className="space-y-4">
-              {bookings.map((booking) => (
+              {!user && (
+                <div className="rounded-[2rem] border border-orange-100 bg-[#f8f6f2] p-8 text-center text-slate-500">
+                  <CheckCircle className="mx-auto mb-3 text-orange-500" />
+                  <p className="font-bold">
+                    Login to submit and track event requests.
+                  </p>
+                </div>
+              )}
+
+              {user &&
+                bookings.map((booking) => (
                 <div
                   key={booking._id}
                   className="rounded-3xl border border-orange-50 bg-[#f8f6f2] p-4"
@@ -738,7 +761,7 @@ const SpecialEvents = () => {
                 </div>
               ))}
 
-              {bookings.length === 0 && (
+              {user && bookings.length === 0 && (
                 <div className="rounded-[2rem] border border-orange-100 bg-[#f8f6f2] p-8 text-center text-slate-500">
                   <CheckCircle className="mx-auto mb-3 text-orange-500" />
                   No event requests yet.

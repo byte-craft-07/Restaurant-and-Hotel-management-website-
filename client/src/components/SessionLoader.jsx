@@ -1,30 +1,31 @@
-import { motion } from "framer-motion";
-import { Utensils } from "lucide-react";
-
 const SessionLoader = () => {
   return (
-    <div className="min-h-screen bg-[#f8f6f2] flex items-center justify-center px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        className="bg-white/80 border border-white/80 rounded-[2rem] p-8 shadow-2xl text-center"
-      >
-        <motion.div
-          animate={{ rotate: [0, 8, -8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-16 h-16 bg-orange-500 text-white rounded-2xl flex items-center justify-center mx-auto mb-5"
-        >
-          <Utensils size={30} />
-        </motion.div>
+    <div className="min-h-screen bg-[#f8f6f2] p-5 md:p-8">
+      <div className="mx-auto max-w-5xl rounded-[2rem] border border-white/80 bg-white/75 p-6 shadow-xl backdrop-blur-2xl md:p-8">
+        <div className="flex items-center gap-4">
+          <div className="premium-shimmer h-16 w-16 rounded-2xl" />
+          <div className="flex-1 space-y-3">
+            <div className="premium-shimmer h-6 w-52 rounded-full" />
+            <div className="premium-shimmer h-4 w-72 max-w-full rounded-full" />
+          </div>
+        </div>
 
-        <h2 className="text-2xl font-black text-slate-900">
-          Preparing your room...
-        </h2>
-
-        <p className="text-slate-500 mt-2">
-          Restoring your secure dining session.
-        </p>
-      </motion.div>
+        <div className="mt-8 grid gap-5 md:grid-cols-3">
+          {[1, 2, 3].map((item) => (
+            <div
+              key={item}
+              className="rounded-[1.5rem] border border-orange-50 bg-white/70 p-4"
+            >
+              <div className="premium-shimmer h-36 rounded-[1.25rem]" />
+              <div className="mt-4 space-y-3">
+                <div className="premium-shimmer h-5 w-2/3 rounded-full" />
+                <div className="premium-shimmer h-4 w-full rounded-full" />
+                <div className="premium-shimmer h-4 w-1/2 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

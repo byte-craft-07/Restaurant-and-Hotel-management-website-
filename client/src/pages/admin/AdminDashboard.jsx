@@ -40,12 +40,12 @@ const AdminDashboard = () => {
   if (!analytics) {
     return (
       <div className="space-y-6">
-        <div className="h-28 animate-pulse rounded-[2rem] bg-white/70 shadow-lg" />
+        <div className="premium-shimmer h-28 rounded-[2rem] shadow-lg" />
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {[1, 2, 3, 4].map((item) => (
             <div
               key={item}
-              className="h-36 animate-pulse rounded-[2rem] bg-white/70 shadow-lg"
+              className="premium-shimmer h-36 rounded-[2rem] shadow-lg"
             />
           ))}
         </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Lock, Mail, Sparkles } from "lucide-react";
@@ -8,6 +8,7 @@ import { FieldError } from "../../components/form/PremiumFields";
 import { getCustomerRedirect, getRoleRedirect } from "../../utils/authRedirect";
 import { getAuthErrorMessage } from "../../utils/apiErrors";
 import { API_BASE_URL } from "../../services/api";
+import PageNavigation from "../../components/PageNavigation";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -18,14 +19,26 @@ const Login = () => {
   const [error, setError] = useState("");
   const [formErrors, setFormErrors] = useState({});
 
-  const { login } = useAuth();
+  const { login, user, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const redirect = searchParams.get("redirect") || "/menu";
+  const redirect = searchParams.get("redirect") || "/";
   const qrToken = searchParams.get("qrToken");
   const switchCustomer = searchParams.get("switchCustomer") === "1";
   const customerRedirect = getCustomerRedirect(redirect);
+  const encodedCustomerRedirect = encodeURIComponent(customerRedirect);
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate(
+        user.role === "customer"
+          ? getCustomerRedirect(redirect)
+          : getRoleRedirect(user.role, redirect),
+        { replace: true }
+      );
+    }
+  }, [loading, navigate, redirect, user]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -66,7 +79,11 @@ const Login = () => {
         localStorage.setItem("qrToken", qrToken);
       }
 
-      navigate(getRoleRedirect(data.user.role, redirect));
+      navigate(
+        data.user.role === "customer"
+          ? getCustomerRedirect(redirect)
+          : getRoleRedirect(data.user.role, redirect)
+      );
     } catch (err) {
       setError(getAuthErrorMessage(err, "Login failed"));
     }
@@ -136,6 +153,7 @@ const Login = () => {
             transition={{ duration: 0.55 }}
             className="w-full max-w-md rounded-[2rem] border border-white/80 bg-white/75 p-8 shadow-2xl backdrop-blur-2xl"
           >
+            <PageNavigation className="mb-6" />
             <div className="mb-8">
               <BrandLogo
                 className="mb-6"
@@ -218,25 +236,10 @@ const Login = () => {
               </button>
             </form>
 
-            <button
-              type="button"
-              onClick={() => {
-                setFormData({
-                  emailOrPhone: "admin@restro.com",
-                  password: "admin123",
-                });
-                setError("");
-                setFormErrors({});
-              }}
-              className="mt-4 w-full rounded-2xl border border-orange-200 bg-orange-50 p-3 text-sm font-bold text-orange-600 transition hover:bg-orange-100"
-            >
-              Use admin login
-            </button>
-
             <p className="mt-6 text-center text-sm text-slate-500">
               New customer?{" "}
               <Link
-                to={`/register?redirect=${customerRedirect}${
+                to={`/register?redirect=${encodedCustomerRedirect}${
                   qrToken ? `&qrToken=${qrToken}` : ""
                 }`}
                 className="font-bold text-orange-500"

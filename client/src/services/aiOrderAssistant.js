@@ -690,7 +690,7 @@ export const buildOrderFromText = async ({ query, menuItems }) => {
         return normalizeRemoteResult(result, menuItems);
       }
     } catch {
-      // Local fallback keeps the demo working when the AI endpoint is unavailable.
+      // Local fallback keeps ordering usable when the AI endpoint is unavailable.
     }
   }
 

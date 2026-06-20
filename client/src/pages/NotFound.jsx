@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, ChefHat, Home, SearchX } from "lucide-react";
+import AccountChip from "../components/AccountChip";
 
 
 const NotFound = () => {
@@ -9,6 +10,9 @@ const NotFound = () => {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,#fb923c_0,transparent_28%),radial-gradient(circle_at_bottom_right,#fde68a_0,transparent_30%)] opacity-20" />
       <div className="absolute top-20 left-10 w-72 h-72 bg-orange-300/30 blur-3xl rounded-full" />
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-yellow-300/30 blur-3xl rounded-full" />
+      <div className="absolute right-5 top-5 z-20">
+        <AccountChip />
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 30, scale: 0.96 }}

@@ -11,6 +11,8 @@ const getStoredUser = () => {
   }
 };
 
+const getStoredToken = () => localStorage.getItem("token");
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(getStoredUser);
   const [loading, setLoading] = useState(true);
@@ -38,26 +40,39 @@ export const AuthProvider = ({ children }) => {
     return res.data;
   };
 
+  const clearSession = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+  };
+
   const logout = async () => {
-  await api.post("/auth/logout");
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-  setUser(null);
-};
+    try {
+      await api.post("/auth/logout");
+    } finally {
+      clearSession();
+    }
+  };
 
   const getMe = async () => {
-  try {
-    const res = await api.get("/auth/me");
-    localStorage.setItem("user", JSON.stringify(res.data.user));
-    setUser(res.data.user);
-  } catch {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    setUser(null);
-  } finally {
-    setLoading(false);
-  }
-};
+    if (!getStoredToken()) {
+      clearSession();
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await api.get("/auth/me");
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      setUser(res.data.user);
+    } catch (error) {
+      if (error.response?.status === 401) {
+        clearSession();
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     getMe();

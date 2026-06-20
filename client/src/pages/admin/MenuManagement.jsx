@@ -3,20 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Pencil, Plus, Trash2, Utensils } from "lucide-react";
 import api from "../../services/api";
-import {
-  buildDemoBackedMenu,
-  DEMO_MENU_ITEMS,
-} from "../../services/demoExperience";
-
-const getImageUrl = (image) => {
-  if (!image) return "";
-
-  return image.startsWith("/uploads")
-    ? `http://localhost:5000${image}`
-    : image;
-};
-
-const isDemoMenuItem = (item) => item._id?.startsWith("demo-");
+import { resolveMediaUrl } from "../../utils/mediaUrl";
 
 const MenuManagement = () => {
   const [menuItems, setMenuItems] = useState([]);
@@ -26,25 +13,16 @@ const MenuManagement = () => {
     try {
       const res = await api.get("/menu");
       const fetchedItems = res.data.menuItems || [];
-      const demoModeEnabled = import.meta.env.VITE_ENABLE_DEMO_MODE !== "false";
-      const demoBackedMenu = demoModeEnabled
-        ? buildDemoBackedMenu({ menuItems: fetchedItems })
-        : null;
 
-      setMenuItems(demoBackedMenu?.menuItems || fetchedItems);
+      setMenuItems(fetchedItems);
     } catch {
-      setMenuItems(DEMO_MENU_ITEMS);
+      setMenuItems([]);
     } finally {
       setLoading(false);
     }
   };
 
   const deleteMenuItem = async (id) => {
-    if (id?.startsWith("demo-")) {
-      window.alert("This is a demo preview item. Add it as a real item before editing or deleting.");
-      return;
-    }
-
     const confirmDelete = window.confirm("Delete this menu item?");
     if (!confirmDelete) return;
 
@@ -82,7 +60,7 @@ const MenuManagement = () => {
             {[1, 2, 3].map((item) => (
               <div
                 key={item}
-                className="h-80 animate-pulse rounded-[2rem] bg-white/70 shadow-lg"
+                className="premium-shimmer h-80 rounded-[2rem] shadow-lg"
               />
             ))}
           </div>
@@ -99,7 +77,7 @@ const MenuManagement = () => {
                 <div className="h-44 bg-orange-50">
                   {item.image ? (
                     <img
-                      src={getImageUrl(item.image)}
+                      src={resolveMediaUrl(item.image)}
                       alt={item.name}
                       className="h-full w-full object-cover transition duration-700 hover:scale-105"
                     />
@@ -122,29 +100,21 @@ const MenuManagement = () => {
                     </div>
 
                     <div className="flex gap-2">
-                      {isDemoMenuItem(item) ? (
-                        <span className="rounded-full bg-orange-50 px-3 py-2 text-xs font-black text-orange-600">
-                          Demo
-                        </span>
-                      ) : (
-                        <>
-                          <Link
-                            to={`/admin/menu/edit/${item._id}`}
-                            className="rounded-xl bg-blue-50 p-2 text-blue-600 transition hover:bg-blue-100"
-                            aria-label={`Edit ${item.name}`}
-                          >
-                            <Pencil size={18} />
-                          </Link>
+                      <Link
+                        to={`/admin/menu/edit/${item._id}`}
+                        className="rounded-xl bg-blue-50 p-2 text-blue-600 transition hover:bg-blue-100"
+                        aria-label={`Edit ${item.name}`}
+                      >
+                        <Pencil size={18} />
+                      </Link>
 
-                          <button
-                            onClick={() => deleteMenuItem(item._id)}
-                            className="rounded-xl bg-red-50 p-2 text-red-500 transition hover:bg-red-100"
-                            aria-label={`Delete ${item.name}`}
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </>
-                      )}
+                      <button
+                        onClick={() => deleteMenuItem(item._id)}
+                        className="rounded-xl bg-red-50 p-2 text-red-500 transition hover:bg-red-100"
+                        aria-label={`Delete ${item.name}`}
+                      >
+                        <Trash2 size={18} />
+                      </button>
                     </div>
                   </div>
 

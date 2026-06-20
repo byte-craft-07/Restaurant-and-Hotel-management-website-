@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { BadgePercent, Phone, ReceiptText, Save, UserRound } from "lucide-react";
 import api from "../../services/api";
 import { FieldError, fieldClass } from "../../components/form/PremiumFields";
+import SkeletonBlock from "../../components/Skeleton";
 
 const CustomerDetails = () => {
   const { id } = useParams();
@@ -53,7 +54,21 @@ const CustomerDetails = () => {
   }, [id]);
 
   if (!customer) {
-    return <div className="premium-card p-10 text-slate-500">Loading...</div>;
+    return (
+      <div>
+        <div className="mb-8 space-y-4">
+          <SkeletonBlock className="h-10 w-48 rounded-full" />
+          <SkeletonBlock className="h-12 w-80" />
+          <SkeletonBlock className="h-5 w-56" />
+        </div>
+        <div className="mb-8 grid gap-5 md:grid-cols-4">
+          {[1, 2, 3, 4].map((item) => (
+            <SkeletonBlock key={item} className="h-36 rounded-[2rem]" />
+          ))}
+        </div>
+        <SkeletonBlock className="h-64 rounded-[2rem]" />
+      </div>
+    );
   }
 
   const stats = [

@@ -5,7 +5,19 @@ const serviceRequestSchema = new mongoose.Schema(
     tableRoom: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "TableRoom",
-      required: true,
+      default: null,
+    },
+
+    hotelRoom: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "HotelRoom",
+      default: null,
+    },
+
+    roomBooking: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "RoomBooking",
+      default: null,
     },
 
     customer: {
@@ -16,8 +28,30 @@ const serviceRequestSchema = new mongoose.Schema(
 
     type: {
       type: String,
-      enum: ["waiter", "water", "bill", "assistance"],
+      enum: [
+        "waiter",
+        "food",
+        "water",
+        "water-bottle",
+        "towels",
+        "cleaning",
+        "housekeeping",
+        "laundry",
+        "bill",
+        "spa",
+        "taxi",
+        "breakfast",
+        "event",
+        "concierge",
+        "assistance",
+      ],
       default: "waiter",
+    },
+
+    estimatedAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
 
     note: {

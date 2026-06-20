@@ -14,6 +14,8 @@ const userRoutes = require("./routes/userRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const serviceRequestRoutes = require("./routes/serviceRequestRoutes");
 const eventBookingRoutes = require("./routes/eventBookingRoutes");
+const hotelRoomRoutes = require("./routes/hotelRoomRoutes");
+const roomBookingRoutes = require("./routes/roomBookingRoutes");
 
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 dotenv.config({ path: path.join(__dirname, "..", "..", ".env") });
@@ -114,6 +116,8 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/table-rooms", tableRoomRoutes);
 app.use("/api/rooms", tableRoomRoutes);
+app.use("/api/hotel-rooms", hotelRoomRoutes);
+app.use("/api/room-bookings", roomBookingRoutes);
 app.use("/api/orders", orderRoutes);
 const uploadsDir =
   process.env.VERCEL === "1"

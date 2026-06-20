@@ -214,13 +214,20 @@ const OrderSuccessPanel = ({
         </div>
       )}
 
-      <div className="grid gap-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
           onClick={onNewOrder}
           className="rounded-2xl bg-orange-500 px-5 py-4 font-black text-white shadow-lg shadow-orange-500/20 hover:bg-orange-600"
         >
           Add more items
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-2xl border border-orange-200 bg-white px-5 py-4 font-black text-orange-600 hover:bg-orange-50"
+        >
+          Close
         </button>
       </div>
     </motion.div>

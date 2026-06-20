@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Banknote,
   CreditCard,
@@ -16,29 +17,20 @@ import api from "../services/api";
 import socket from "../services/socket";
 import { FieldError } from "./form/PremiumFields";
 import OrderSuccessPanel from "./order/OrderSuccessPanel";
-import {
-  DEMO_KITCHEN_ORDERS_KEY,
-  createDemoOrderFromCart,
-  isDemoQrToken,
-} from "../services/demoExperience";
 
 const getFriendlyOrderError = (error) => {
   if (!error.response) {
     return "The hotel service connection is taking a moment. Your cart is safe, please try again.";
   }
 
+  if (error.response?.status === 404) {
+    return "This room QR is not active anymore. You can clear it and place a normal website order, or scan a fresh room QR.";
+  }
+
   return (
     error.response?.data?.message ||
     "We could not place the order yet. Please check once and try again."
   );
-};
-
-const getStoredDemoOrders = () => {
-  try {
-    return JSON.parse(localStorage.getItem(DEMO_KITCHEN_ORDERS_KEY) || "[]");
-  } catch {
-    return [];
-  }
 };
 
 const isSameOrder = (currentOrder, updatedOrder) =>
@@ -48,6 +40,7 @@ const isSameOrder = (currentOrder, updatedOrder) =>
     currentOrder.cashCode === updatedOrder.cashCode);
 
 const CartDrawer = ({ open, onClose, tableContext }) => {
+  const navigate = useNavigate();
   const {
     cartItems,
     increaseQty,
@@ -92,42 +85,12 @@ const CartDrawer = ({ open, onClose, tableContext }) => {
       });
     };
 
-    const handleLocalPaymentUpdate = (event) => {
-      applyPaidUpdate(event.detail);
-    };
-
-    const handleStorage = (event) => {
-      if (event.key !== DEMO_KITCHEN_ORDERS_KEY) return;
-
-      setLastOrder((currentOrder) => {
-        if (!currentOrder?.cashCode) return currentOrder;
-
-        const updatedOrder = getStoredDemoOrders().find((order) =>
-          isSameOrder(currentOrder, order)
-        );
-
-        if (!updatedOrder) return currentOrder;
-
-        return {
-          ...currentOrder,
-          ...updatedOrder,
-        };
-      });
-    };
-
     socket.on("order_payment_updated", applyPaidUpdate);
     socket.on("order_status_updated", applyPaidUpdate);
-    window.addEventListener("demo_payment_updated", handleLocalPaymentUpdate);
-    window.addEventListener("storage", handleStorage);
 
     return () => {
       socket.off("order_payment_updated", applyPaidUpdate);
       socket.off("order_status_updated", applyPaidUpdate);
-      window.removeEventListener(
-        "demo_payment_updated",
-        handleLocalPaymentUpdate
-      );
-      window.removeEventListener("storage", handleStorage);
     };
   }, []);
 
@@ -152,13 +115,7 @@ const CartDrawer = ({ open, onClose, tableContext }) => {
         const qrToken = localStorage.getItem("qrToken");
 
         if (!qrToken) {
-          setMessage("Please scan your room QR first.");
-          return;
-        }
-
-        if (isDemoQrToken(qrToken)) {
-          activeSessionId = `demo-session-${Date.now()}`;
-          setSessionId(activeSessionId);
+          activeSessionId = "";
         } else {
           const cartPreview = cartItems.map((item) => ({
             menuItem: item._id,
@@ -167,59 +124,38 @@ const CartDrawer = ({ open, onClose, tableContext }) => {
             quantity: item.quantity,
           }));
 
-          const scanRes = await api.get(`/rooms/scan/${qrToken}`, {
-            params: {
-              cartPreview: JSON.stringify(cartPreview),
-              numberOfPeople,
-              note,
-              totalAmount,
-            },
-          });
+          let scanRes;
 
-          activeSessionId = scanRes.data.data.sessionId;
-          setSessionId(activeSessionId);
+          try {
+            scanRes = await api.get(`/rooms/scan/${qrToken}`, {
+              params: {
+                cartPreview: JSON.stringify(cartPreview),
+                numberOfPeople,
+                note,
+                totalAmount,
+              },
+            });
+          } catch (error) {
+            if (error.response?.status === 404) {
+              localStorage.removeItem("qrToken");
+              localStorage.removeItem("verifiedSessionId");
+              setSessionId("");
+              activeSessionId = "";
+              setMessage("Old room QR cleared. Placing this as a normal website order.");
+            } else {
+              throw error;
+            }
+          }
+
+          if (scanRes?.data?.data?.sessionId) {
+            activeSessionId = scanRes.data.data.sessionId;
+            setSessionId(activeSessionId);
+          }
         }
       }
 
-      if (activeSessionId?.startsWith("demo-session")) {
-        const demoOrder = createDemoOrderFromCart({
-          cartItems,
-          numberOfPeople,
-          note,
-          totalAmount: finalAmount,
-          tableContext,
-        });
-        demoOrder.paymentMethod = paymentMethod;
-        demoOrder.paymentStatus =
-          paymentMethod === "cash" ? "pending_cash" : "paid";
-        demoOrder.status =
-          paymentMethod === "cash" ? "payment_pending" : "pending";
-        demoOrder.cashCode =
-          paymentMethod === "cash"
-            ? `CASH-${Math.floor(100000 + Math.random() * 900000)}`
-            : undefined;
-
-        const savedOrders = JSON.parse(
-          localStorage.getItem(DEMO_KITCHEN_ORDERS_KEY) || "[]"
-        );
-
-        localStorage.setItem(
-          DEMO_KITCHEN_ORDERS_KEY,
-          JSON.stringify([demoOrder, ...savedOrders].slice(0, 8))
-        );
-        window.dispatchEvent(
-          new CustomEvent("demo_order_created", { detail: demoOrder })
-        );
-
-        clearCart();
-        setSessionId("");
-        setMessage("");
-        setLastOrder(demoOrder);
-        return;
-      }
-
       const payload = {
-        sessionId: activeSessionId,
+        sessionId: activeSessionId || undefined,
         numberOfPeople,
         note,
         paymentMethod,
@@ -257,6 +193,10 @@ const CartDrawer = ({ open, onClose, tableContext }) => {
       setPaymentMethod("online");
       setMessage(res.data.message || "");
       setLastOrder(successOrder);
+      onClose();
+      navigate(`/my-orders?order=${successOrder._id}`, {
+        state: { message: "Order placed successfully." },
+      });
     } catch (error) {
       setMessage(getFriendlyOrderError(error));
     } finally {
@@ -458,8 +398,8 @@ const CartDrawer = ({ open, onClose, tableContext }) => {
                     Payment before order
                   </h3>
                   <p className="text-sm text-slate-500">
-                    Pay online now, or choose cash and show the generated code
-                    at the hotel counter.
+                    Order normally from the website, or scan a room QR to link
+                    it with a room. Cash orders generate a counter code.
                   </p>
                 </div>
 
@@ -499,9 +439,32 @@ const CartDrawer = ({ open, onClose, tableContext }) => {
               </div>
 
               {message && (
-                <p className="rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-700">
-                  {message}
-                </p>
+                <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-700">
+                  <p>{message}</p>
+                  {message.toLowerCase().includes("room qr") && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Link
+                        to="/rooms"
+                        onClick={onClose}
+                        className="rounded-xl bg-orange-500 px-3 py-2 text-xs font-black text-white"
+                      >
+                        View rooms
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          localStorage.removeItem("qrToken");
+                          localStorage.removeItem("verifiedSessionId");
+                          setSessionId("");
+                          setMessage("Room QR cleared. Please scan a fresh room QR.");
+                        }}
+                        className="rounded-xl bg-white px-3 py-2 text-xs font-black text-orange-600"
+                      >
+                        Clear QR
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
 
               <button

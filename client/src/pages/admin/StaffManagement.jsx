@@ -316,7 +316,7 @@ const StaffManagement = () => {
             {[1, 2, 3].map((item) => (
               <div
                 key={item}
-                className="h-44 animate-pulse rounded-[2rem] bg-white/70"
+                className="premium-shimmer h-44 rounded-[2rem]"
               />
             ))}
           </div>

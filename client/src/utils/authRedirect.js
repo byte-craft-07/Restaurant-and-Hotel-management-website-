@@ -1,21 +1,20 @@
 const isInternalPath = (path) =>
   typeof path === "string" && path.startsWith("/") && !path.startsWith("//");
 
-const isStaffArea = (path) =>
-  path.startsWith("/admin") ||
-  path.startsWith("/waiter") ||
-  path.startsWith("/service") ||
-  path.startsWith("/kitchen");
-
 export const getCustomerRedirect = (redirect) => {
-  if (!isInternalPath(redirect)) return "/menu";
-  if (isStaffArea(redirect)) return "/menu";
-  if (["/login", "/register", "/unauthorized"].includes(redirect)) {
-    return "/menu";
+  const safeRedirect = isInternalPath(redirect) ? redirect : "";
+
+  if (
+    safeRedirect &&
+    !["/login", "/register", "/unauthorized"].includes(safeRedirect)
+  ) {
+    return safeRedirect;
   }
 
-  return redirect || "/menu";
+  return "/";
 };
+
+export const getCustomerDashboardPath = () => "/profile";
 
 export const getRoleRedirect = (role, redirect) => {
   const safeRedirect = isInternalPath(redirect) ? redirect : "";
@@ -34,5 +33,5 @@ export const getRoleRedirect = (role, redirect) => {
     return safeRedirect.startsWith("/kitchen") ? safeRedirect : "/kitchen";
   }
 
-  return getCustomerRedirect(safeRedirect || "/menu");
+  return getCustomerDashboardPath();
 };

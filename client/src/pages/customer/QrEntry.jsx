@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { QrCode } from "lucide-react";
 import BrandLogo from "../../components/BrandLogo";
 import { useAuth } from "../../context/AuthContext";
-import { isDemoQrToken } from "../../services/demoExperience";
 
 const QrEntry = () => {
   const { token } = useParams();
@@ -16,9 +15,7 @@ const QrEntry = () => {
 
     localStorage.setItem("qrToken", token);
 
-    if (isDemoQrToken(token) && !user) {
-      navigate("/menu", { replace: true });
-    } else if (user?.role === "customer") {
+    if (user?.role === "customer") {
       navigate("/menu", { replace: true });
     } else if (user) {
       navigate(`/login?redirect=/menu&qrToken=${token}&switchCustomer=1`, {

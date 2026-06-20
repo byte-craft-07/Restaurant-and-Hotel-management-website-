@@ -1,20 +1,22 @@
 import axios from "axios";
 
 const configuredApiUrl = import.meta.env.VITE_API_URL;
-const DEPLOYED_API_URL =
-  "https://restaurant-and-hotel-management-website.onrender.com/api";
+const LOCAL_API_URL = "http://localhost:5000/api";
+const SAME_ORIGIN_API_URL = "/api";
 const isLocalhostUrl = (value = "") =>
   /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(value);
 
 export const API_BASE_URL =
   configuredApiUrl && (import.meta.env.DEV || !isLocalhostUrl(configuredApiUrl))
     ? configuredApiUrl
-    : DEPLOYED_API_URL;
+    : import.meta.env.DEV
+      ? LOCAL_API_URL
+      : SAME_ORIGIN_API_URL;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  timeout: 12000,
+  timeout: 30000,
 });
 
 api.interceptors.request.use((config) => {

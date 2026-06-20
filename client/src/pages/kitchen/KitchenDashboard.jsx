@@ -1,23 +1,18 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Activity,
   CheckCircle,
   Clock,
   CookingPot,
   Flame,
-  Home,
   IndianRupee,
   ReceiptText,
   Sparkles,
 } from "lucide-react";
 import socket from "../../services/socket";
 import api from "../../services/api";
-import {
-  DEMO_KITCHEN_ORDERS_KEY,
-  DEMO_ORDERS,
-} from "../../services/demoExperience";
+import AccountChip from "../../components/AccountChip";
+import PageNavigation from "../../components/PageNavigation";
 
 const activeStatuses = ["pending", "accepted", "preparing"];
 
@@ -60,20 +55,9 @@ const formatElapsed = (dateValue, now = Date.now()) => {
   return `${minutes} min ago`;
 };
 
-const getStoredDemoOrders = () => {
-  try {
-    return JSON.parse(localStorage.getItem(DEMO_KITCHEN_ORDERS_KEY) || "[]");
-  } catch {
-    return [];
-  }
-};
-
-const getDemoOrderSeed = () => [...getStoredDemoOrders(), ...DEMO_ORDERS];
-
 const KitchenDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [, setAllOrders] = useState([]);
-  const [demoMode, setDemoMode] = useState(false);
   const [highlightedOrderId, setHighlightedOrderId] = useState("");
   const [nowTick, setNowTick] = useState(Date.now());
   const [stats, setStats] = useState({
@@ -96,33 +80,13 @@ const KitchenDashboard = () => {
     try {
       const res = await api.get("/orders");
       const fetchedOrders = res.data.orders || [];
-      const hasRealOrders = fetchedOrders.length > 0;
-      const nextOrders = hasRealOrders ? fetchedOrders : getDemoOrderSeed();
-
-      setDemoMode(!hasRealOrders);
-      applyOrderCollection(nextOrders);
+      applyOrderCollection(fetchedOrders);
     } catch {
-      setDemoMode(true);
-      applyOrderCollection(getDemoOrderSeed());
+      applyOrderCollection([]);
     }
   };
 
   const updateStatus = async (orderId, status) => {
-    if (demoMode || orderId.startsWith("demo-")) {
-      setAllOrders((prev) => {
-        const next = prev.map((order) =>
-          order._id === orderId ? { ...order, status } : order
-        );
-
-        setOrders(
-          next.filter((order) => activeStatuses.includes(order.status))
-        );
-        setStats(buildStats(next));
-        return next;
-      });
-      return;
-    }
-
     const res = await api.put(`/orders/${orderId}/status`, { status });
 
     setOrders((prev) =>
@@ -197,73 +161,6 @@ const KitchenDashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (!demoMode) return undefined;
-
-    const statusCycle = {
-      pending: "accepted",
-      accepted: "preparing",
-      preparing: "pending",
-    };
-
-    const interval = setInterval(() => {
-      setAllOrders((prev) => {
-        const activeOrders = prev.filter((order) =>
-          activeStatuses.includes(order.status)
-        );
-        if (activeOrders.length === 0) return prev;
-
-        const targetOrder = activeOrders[Date.now() % activeOrders.length];
-        const next = prev.map((order) =>
-          order._id === targetOrder._id
-            ? { ...order, status: statusCycle[order.status] || "pending" }
-            : order
-        );
-
-        setOrders(
-          next.filter((order) => activeStatuses.includes(order.status))
-        );
-        setStats(buildStats(next));
-        return next;
-      });
-    }, 9000);
-
-    return () => clearInterval(interval);
-  }, [demoMode]);
-
-  useEffect(() => {
-    const addDemoOrder = (order) => {
-      setDemoMode(true);
-      setHighlightedOrderId(order._id);
-      setAllOrders((prev) => {
-        const next = [order, ...prev.filter((item) => item._id !== order._id)];
-        setOrders(
-          next.filter((item) => activeStatuses.includes(item.status))
-        );
-        setStats(buildStats(next));
-        return next;
-      });
-    };
-
-    const handleDemoOrder = (event) => {
-      if (event.detail) addDemoOrder(event.detail);
-    };
-
-    const handleStorage = (event) => {
-      if (event.key !== DEMO_KITCHEN_ORDERS_KEY) return;
-      const [latestOrder] = getStoredDemoOrders();
-      if (latestOrder) addDemoOrder(latestOrder);
-    };
-
-    window.addEventListener("demo_order_created", handleDemoOrder);
-    window.addEventListener("storage", handleStorage);
-
-    return () => {
-      window.removeEventListener("demo_order_created", handleDemoOrder);
-      window.removeEventListener("storage", handleStorage);
-    };
-  }, []);
-
   const statsCards = [
     {
       label: "Total Orders Today",
@@ -319,7 +216,7 @@ const KitchenDashboard = () => {
           <div>
             <div className="premium-label-pill mb-4">
               <Sparkles size={18} />
-              {demoMode ? "Kitchen Display - Demo Activity" : "Kitchen Display"}
+              Kitchen Display
             </div>
             <h1 className="text-4xl font-black text-slate-950">
               Kitchen Display System
@@ -327,20 +224,11 @@ const KitchenDashboard = () => {
             <p className="mt-2 text-slate-500">
               Live kitchen order queue for food preparation.
             </p>
-            {demoMode && (
-              <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-100 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-700">
-                <Activity size={16} />
-                Story mode is keeping this screen alive until real orders arrive.
-              </p>
-            )}
           </div>
-          <Link
-            to="/"
-            className="inline-flex w-fit items-center gap-2 rounded-2xl border border-orange-100 bg-white/85 px-5 py-3 font-black text-orange-600 shadow-lg shadow-orange-100/60 transition hover:border-orange-200 hover:bg-orange-50"
-          >
-            <Home size={18} />
-            Home Page
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <AccountChip />
+            <PageNavigation backTo="/kitchen" />
+          </div>
         </div>
 
         <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">

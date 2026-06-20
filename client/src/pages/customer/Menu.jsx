@@ -2,21 +2,15 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
-  BadgeCheck,
   BellRing,
   Eye,
-  Flame,
-  Lightbulb,
   LogOut,
   MapPin,
   PartyPopper,
-  PlusCircle,
   ReceiptText,
   Search,
   ShoppingCart,
-  Sparkles,
   UserRound,
-  WandSparkles,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import BrandLogo from "../../components/BrandLogo";
@@ -26,17 +20,7 @@ import MenuCard from "../../components/MenuCard";
 import CartDrawer from "../../components/CartDrawer";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
-import {
-  AI_ORDER_EXAMPLES,
-  buildOrderFromText,
-} from "../../services/aiOrderAssistant";
-import {
-  buildDemoBackedMenu,
-  DEMO_CATEGORIES,
-  DEMO_MENU_ITEMS,
-  getDemoAiSpotlights,
-  isDemoQrToken,
-} from "../../services/demoExperience";
+import PageNavigation from "../../components/PageNavigation";
 
 const QUICK_FILTERS = [
   { id: "all", label: "All picks" },
@@ -83,33 +67,21 @@ const Menu = () => {
   const [activeQuickFilter, setActiveQuickFilter] = useState("all");
   const [cartOpen, setCartOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [menuError, setMenuError] = useState("");
   const [search, setSearch] = useState("");
   const [tableContext, setTableContext] = useState(null);
   const [serviceLoading, setServiceLoading] = useState(false);
   const [serviceMessage, setServiceMessage] = useState("");
-  const [aiPrompt, setAiPrompt] = useState("");
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiResult, setAiResult] = useState(null);
 
-  const { cartItems, addToCart, totalAmount } = useCart();
+  const { cartItems, totalAmount } = useCart();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const sessionId = localStorage.getItem("verifiedSessionId");
-  const demoGuestMode = isDemoQrToken(localStorage.getItem("qrToken")) && !user;
 
   const fetchTableContext = async () => {
     const qrToken = localStorage.getItem("qrToken");
     if (!qrToken) return;
-
-    if (isDemoQrToken(qrToken)) {
-      setTableContext({
-        type: "room",
-        number: "101",
-        label: "Demo guest room",
-      });
-      return;
-    }
 
     try {
       const res = await api.get(`/rooms/context/${qrToken}`);
@@ -121,7 +93,7 @@ const Menu = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/login");
+    navigate("/");
   };
 
   const requestWaiter = async () => {
@@ -153,36 +125,41 @@ const Menu = () => {
   };
 
   const fetchData = async () => {
+    setLoading(true);
+    setMenuError("");
+
     try {
-      const [menuRes, categoryRes] = await Promise.all([
+      const [menuResult, categoryResult] = await Promise.allSettled([
         api.get("/menu"),
         api.get("/categories"),
       ]);
 
-      const fetchedItems = menuRes.data.menuItems || [];
-      const fetchedCategories = categoryRes.data.categories || [];
-      const demoModeEnabled = import.meta.env.VITE_ENABLE_DEMO_MODE !== "false";
-      const demoMenu = demoModeEnabled
-        ? buildDemoBackedMenu({
-            menuItems: fetchedItems,
-            categories: fetchedCategories,
-          })
-        : null;
+      if (menuResult.status === "rejected") {
+        throw menuResult.reason;
+      }
 
-      setMenuItems(
-        fetchedItems.length > 0
-          ? demoMenu?.menuItems || fetchedItems
-          : DEMO_MENU_ITEMS
-      );
-      setCategories(
-        fetchedCategories.length > 0
-          ? demoMenu?.categories || fetchedCategories
-          : DEMO_CATEGORIES
-      );
+      const fetchedItems = menuResult.value.data.menuItems || [];
+      const fetchedCategories =
+        categoryResult.status === "fulfilled"
+          ? categoryResult.value.data.categories || []
+          : Array.from(
+              new Map(
+                fetchedItems
+                  .filter((item) => item.category?._id)
+                  .map((item) => [item.category._id, item.category])
+              ).values()
+            );
+
+      setMenuItems(fetchedItems);
+      setCategories(fetchedCategories);
       fetchTableContext();
-    } catch {
-      setMenuItems(DEMO_MENU_ITEMS);
-      setCategories(DEMO_CATEGORIES);
+    } catch (error) {
+      setMenuItems([]);
+      setCategories([]);
+      setMenuError(
+        error.response?.data?.message ||
+          "Menu load nahi ho paaya. Please refresh once."
+      );
     } finally {
       setLoading(false);
     }
@@ -191,68 +168,6 @@ const Menu = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const runAiAssistant = async (prompt = aiPrompt) => {
-    const query = prompt.trim();
-
-    if (!query) {
-      setAiResult({
-        status: "empty",
-        message:
-          "Tell me what you are craving and I will match it with the menu.",
-        cartItems: [],
-        suggestions: [],
-      });
-      return;
-    }
-
-    try {
-      setAiLoading(true);
-
-      const result = await buildOrderFromText({
-        query,
-        menuItems,
-      });
-
-      if (result.cartItems?.length > 0) {
-        result.cartItems.forEach(({ item, quantity }) => {
-          addToCart(item, quantity);
-        });
-        setCartOpen(true);
-      }
-
-      setAiResult(result);
-    } catch {
-      setAiResult({
-        status: "empty",
-        message:
-          "I am not fully sure yet. Try a dish name, spice mood, or budget.",
-        cartItems: [],
-        suggestions: [],
-      });
-    } finally {
-      setAiLoading(false);
-    }
-  };
-
-  const handleAiExample = (example) => {
-    setAiPrompt(example);
-    runAiAssistant(example);
-  };
-
-  const addSuggestionToCart = (item) => {
-    addToCart(item, 1);
-    setAiResult((prev) =>
-      prev
-        ? {
-            ...prev,
-            message: `${item.name} added to your cart.`,
-          }
-        : prev
-    );
-  };
-
-  const aiSpotlights = getDemoAiSpotlights(menuItems);
 
   const filteredItems = menuItems.filter((item) => {
     const categoryMatch =
@@ -275,6 +190,18 @@ const Menu = () => {
 
     return categoryMatch && quickFilterMatch && searchMatch;
   });
+
+  const hasMenuItems = menuItems.length > 0;
+  const hasActiveFilters =
+    Boolean(search.trim()) ||
+    activeCategory !== "all" ||
+    activeQuickFilter !== "all";
+
+  const resetMenuFilters = () => {
+    setSearch("");
+    setActiveCategory("all");
+    setActiveQuickFilter("all");
+  };
 
   return (
     <div className="safe-page relative min-h-screen overflow-hidden bg-[#f8f6f2] text-slate-900">
@@ -319,6 +246,8 @@ const Menu = () => {
                   </p>
                 </div>
 
+                <PageNavigation backTo="/" />
+
                 <Link
                   to="/profile"
                   className="flex items-center gap-2 rounded-2xl border border-white/80 bg-white/70 px-4 py-3 font-bold text-slate-700 shadow-sm transition hover:border-orange-200 hover:text-orange-500"
@@ -353,18 +282,6 @@ const Menu = () => {
                 </p>
                 <p className="text-xs font-semibold capitalize text-amber-600">
                   Signed in as {user.role}
-                </p>
-              </div>
-            )}
-
-            {demoGuestMode && (
-              <div className="rounded-2xl border border-orange-100 bg-orange-50 px-4 py-2 shadow-sm">
-                <p className="flex items-center gap-2 text-sm font-black text-orange-700">
-                  <Eye size={16} />
-                  Demo Guest
-                </p>
-                <p className="text-xs font-semibold text-orange-600">
-                  Backend-safe preview mode
                 </p>
               </div>
             )}
@@ -448,227 +365,7 @@ const Menu = () => {
           <RestaurantBrandPanel tableContext={tableContext} />
         </div>
 
-        <motion.section
-          initial={{ opacity: 0, y: 25 }}
-          animate={{ opacity: 1, y: 0 }}
-          whileHover={{ y: -4 }}
-          className="relative mb-8 overflow-hidden rounded-[1.5rem] border border-white/80 bg-white/75 p-4 shadow-xl backdrop-blur-2xl md:rounded-[2rem] md:p-6"
-        >
-          <motion.div
-            animate={{ x: ["-30%", "130%"] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-            className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-amber-100/70 to-transparent"
-          />
-
-          <div className="relative z-10 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-start">
-            <div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-orange-100 bg-orange-50 px-4 py-2 text-sm font-black text-orange-600">
-                <Sparkles size={17} />
-                AI Order Assistant
-              </div>
-
-              <h2 className="text-2xl font-black text-slate-900 md:text-3xl">
-                Tell DineLink what you want
-              </h2>
-
-              <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
-                Type naturally. I will match your sentence with available menu
-                items and build your cart only when the match is clear.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 rounded-2xl border border-white/80 bg-white/70 px-4 py-3 text-sm font-bold text-slate-600 shadow-sm">
-              <Lightbulb size={18} className="text-amber-500" />
-              Menu-aware, demo-ready
-            </div>
-          </div>
-
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              runAiAssistant();
-            }}
-            className="relative z-10 mt-5 grid gap-3 lg:grid-cols-[1fr_auto]"
-          >
-            <div className="relative">
-              <WandSparkles
-                size={20}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-400"
-              />
-
-              <input
-                value={aiPrompt}
-                onChange={(event) => setAiPrompt(event.target.value)}
-                placeholder="Tell me what you want... e.g. 2 burgers and 1 cold coffee"
-                aria-label="AI order assistant prompt"
-                className="w-full rounded-2xl border border-slate-200 bg-white py-4 pl-12 pr-4 text-slate-900 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
-              />
-            </div>
-
-            <motion.button
-              whileHover={{ y: -3, scale: 1.02 }}
-              whileTap={{ scale: 0.96 }}
-              type="submit"
-              disabled={aiLoading}
-              className="flex items-center justify-center gap-2 rounded-2xl bg-orange-500 px-6 py-4 font-black text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-600 disabled:bg-slate-300 disabled:shadow-none"
-            >
-              {aiLoading ? "Thinking..." : "Build My Order"}
-              <ArrowRight size={19} />
-            </motion.button>
-          </form>
-
-          <div className="relative z-10 mt-4 flex flex-wrap gap-2">
-            {AI_ORDER_EXAMPLES.map((example) => (
-              <motion.button
-                key={example}
-                whileHover={{ y: -3 }}
-                whileTap={{ scale: 0.96 }}
-                type="button"
-                onClick={() => handleAiExample(example)}
-                className="shrink-0 rounded-full border border-orange-100 bg-white/80 px-4 py-2 text-sm font-bold text-slate-600 shadow-sm transition hover:border-orange-200 hover:text-orange-600"
-              >
-                {example}
-              </motion.button>
-            ))}
-          </div>
-
-          {aiSpotlights.length > 0 && (
-            <div className="relative z-10 mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              {aiSpotlights.map((card, index) => (
-                <motion.button
-                  key={card.title}
-                  type="button"
-                  whileHover={{ y: -6, scale: 1.01 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => {
-                    setAiPrompt(card.prompt);
-                    runAiAssistant(card.prompt);
-                  }}
-                  className="group overflow-hidden rounded-[1.5rem] border border-white/80 bg-white/75 p-4 text-left shadow-sm backdrop-blur-xl transition hover:border-orange-200 hover:shadow-xl hover:shadow-orange-100/60"
-                >
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-black text-orange-600">
-                      {card.label}
-                    </span>
-
-                    <motion.span
-                      animate={{
-                        y: [0, -4, 0],
-                        rotate: index % 2 === 0 ? [0, 8, -8, 0] : [0, -8, 8, 0],
-                      }}
-                      transition={{
-                        duration: 3,
-                        repeat: Infinity,
-                        delay: index * 0.2,
-                      }}
-                      className="flex h-9 w-9 items-center justify-center rounded-2xl bg-amber-50 text-orange-500"
-                    >
-                      {index === 0 ? (
-                        <Flame size={18} />
-                      ) : index === 1 ? (
-                        <BadgeCheck size={18} />
-                      ) : (
-                        <Lightbulb size={18} />
-                      )}
-                    </motion.span>
-                  </div>
-
-                  <h3 className="font-black text-slate-900">{card.title}</h3>
-                  <p className="mt-1 text-sm leading-6 text-slate-500">
-                    {card.subtitle}
-                  </p>
-                  <p className="mt-3 text-sm font-black text-orange-600">
-                    Try this prompt
-                  </p>
-                </motion.button>
-              ))}
-            </div>
-          )}
-
-          <AnimatePresence>
-            {aiResult && (
-              <motion.div
-                initial={{ opacity: 0, y: 12, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                className={`relative z-10 mt-5 rounded-[1.5rem] border p-4 ${
-                  aiResult.status === "cart"
-                    ? "border-green-100 bg-green-50 text-green-800"
-                    : aiResult.status === "suggestions"
-                    ? "border-amber-100 bg-amber-50 text-amber-800"
-                    : "border-orange-100 bg-orange-50 text-orange-800"
-                }`}
-              >
-                <p className="font-bold">{aiResult.message}</p>
-
-                {aiResult.cartItems?.length > 0 && (
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {aiResult.cartItems.map(({ item, quantity }) => (
-                      <div
-                        key={item._id}
-                        className="rounded-2xl border border-white/80 bg-white/80 p-3 text-sm text-slate-700 shadow-sm"
-                      >
-                        <p className="font-black">{item.name}</p>
-                        <p className="text-orange-600">
-                          Qty {quantity} | Rs. {item.price}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {aiResult.suggestions?.length > 0 && (
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {aiResult.suggestions.map(({ item, reason }) => (
-                      <div
-                        key={item._id}
-                        className="rounded-2xl border border-white/80 bg-white/85 p-3 text-sm text-slate-700 shadow-sm"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="font-black">{item.name}</p>
-                            <p className="text-xs text-slate-500">{reason}</p>
-                            <p className="mt-1 font-bold text-orange-600">
-                              Rs. {item.price}
-                            </p>
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => addSuggestionToCart(item)}
-                            className="flex items-center gap-1 rounded-xl bg-orange-500 px-3 py-2 text-xs font-black text-white shadow-lg shadow-orange-500/20 hover:bg-orange-600"
-                          >
-                            <PlusCircle size={15} />
-                            Add
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {aiResult.status === "empty" && aiSpotlights.length > 0 && (
-                  <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                    {aiSpotlights.map((card) => (
-                      <button
-                        key={card.title}
-                        type="button"
-                        onClick={() => {
-                          setAiPrompt(card.prompt);
-                          runAiAssistant(card.prompt);
-                        }}
-                        className="rounded-2xl border border-white/80 bg-white/85 p-3 text-left text-sm font-bold text-slate-700 shadow-sm hover:text-orange-600"
-                      >
-                        {card.title}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.section>
-
+        {(loading || hasMenuItems) && (
         <motion.section
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
@@ -777,6 +474,7 @@ const Menu = () => {
             </div>
           </div>
         </motion.section>
+        )}
 
         {loading ? (
           <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
@@ -824,23 +522,40 @@ const Menu = () => {
               <Search size={28} />
             </div>
             <h3 className="text-2xl font-black text-slate-900">
-              No matching dishes yet
+              {hasMenuItems
+                ? "No matching dishes yet"
+                : menuError
+                  ? "Menu could not be loaded"
+                  : "Today's menu is being prepared"}
             </h3>
             <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-              Try a simpler search, switch category, or ask the AI assistant for
-              something like spicy veg food under Rs. 300.
+              {hasMenuItems
+                ? "Search ya filters reset karke full menu dekh sakte ho."
+                : menuError ||
+                  "Please check again shortly or ask the hotel desk for today's available dishes."}
             </p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearch("");
-                setActiveCategory("all");
-                setActiveQuickFilter("all");
-              }}
-              className="mt-5 rounded-2xl bg-orange-500 px-5 py-3 font-black text-white shadow-lg shadow-orange-500/20 hover:bg-orange-600"
-            >
-              Show full menu
-            </button>
+            <div className="mt-5 flex flex-wrap justify-center gap-3">
+              {hasMenuItems && hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={resetMenuFilters}
+                  className="rounded-2xl bg-orange-500 px-5 py-3 font-black text-white shadow-lg shadow-orange-500/20 hover:bg-orange-600"
+                >
+                  Show full menu
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={fetchData}
+                className={`rounded-2xl px-5 py-3 font-black shadow-lg transition ${
+                  hasMenuItems && hasActiveFilters
+                    ? "border border-orange-200 bg-white text-orange-600 hover:bg-orange-50"
+                    : "bg-orange-500 text-white shadow-orange-500/20 hover:bg-orange-600"
+                }`}
+              >
+                Refresh menu
+              </button>
+            </div>
           </motion.div>
         )}
       </main>

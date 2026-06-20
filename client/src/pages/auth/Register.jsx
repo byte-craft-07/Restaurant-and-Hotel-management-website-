@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -12,9 +12,10 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import BrandLogo from "../../components/BrandLogo";
 import { FieldError } from "../../components/form/PremiumFields";
-import { getCustomerRedirect } from "../../utils/authRedirect";
+import { getCustomerRedirect, getRoleRedirect } from "../../utils/authRedirect";
 import { getAuthErrorMessage } from "../../utils/apiErrors";
 import { API_BASE_URL } from "../../services/api";
+import PageNavigation from "../../components/PageNavigation";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -27,13 +28,25 @@ const Register = () => {
   const [error, setError] = useState("");
   const [formErrors, setFormErrors] = useState({});
 
-  const { register } = useAuth();
+  const { register, user, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const redirect = searchParams.get("redirect") || "/menu";
+  const redirect = searchParams.get("redirect") || "/";
   const qrToken = searchParams.get("qrToken");
   const customerRedirect = getCustomerRedirect(redirect);
+  const encodedCustomerRedirect = encodeURIComponent(customerRedirect);
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate(
+        user.role === "customer"
+          ? getCustomerRedirect(redirect)
+          : getRoleRedirect(user.role, redirect),
+        { replace: true }
+      );
+    }
+  }, [loading, navigate, redirect, user]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -143,6 +156,7 @@ const Register = () => {
             transition={{ duration: 0.55 }}
             className="w-full max-w-md rounded-[2rem] border border-white/80 bg-white/75 p-8 shadow-2xl backdrop-blur-2xl"
           >
+            <PageNavigation className="mb-6" />
             <div className="mb-8">
               <BrandLogo
                 className="mb-6"
@@ -271,7 +285,7 @@ const Register = () => {
             <p className="mt-6 text-center text-sm text-slate-500">
               Already have account?{" "}
               <Link
-                to={`/login?redirect=${customerRedirect}${
+                to={`/login?redirect=${encodedCustomerRedirect}${
                   qrToken ? `&qrToken=${qrToken}` : ""
                 }`}
                 className="font-bold text-orange-500"

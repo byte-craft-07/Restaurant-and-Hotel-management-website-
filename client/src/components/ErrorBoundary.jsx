@@ -33,7 +33,7 @@ class ErrorBoundary extends Component {
           </h1>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
             Your dining flow is safe. Refresh the experience or return home and
-            continue the demo calmly.
+            continue calmly.
           </p>
 
           <div className="mt-7 grid gap-3 sm:grid-cols-2">

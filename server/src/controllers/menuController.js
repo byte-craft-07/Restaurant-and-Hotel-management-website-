@@ -63,7 +63,8 @@ const getMenuItems = async (req, res) => {
   try {
     const menuItems = await MenuItem.find()
       .populate("category", "name")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({
       success: true,

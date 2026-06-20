@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Home, LockKeyhole, Utensils } from "lucide-react";
+import { ArrowRight, LockKeyhole, Utensils } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import PremiumHoverCard from "../components/motion/PremiumHoverCard";
+import AccountChip from "../components/AccountChip";
+import PageNavigation from "../components/PageNavigation";
 
 const Unauthorized = () => {
   const { user } = useAuth();
@@ -13,6 +15,9 @@ const Unauthorized = () => {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,#fb923c_0,transparent_28%),radial-gradient(circle_at_bottom_right,#fde68a_0,transparent_30%)] opacity-20" />
       <div className="absolute left-8 top-20 h-72 w-72 rounded-full bg-orange-300/30 blur-3xl" />
       <div className="absolute bottom-16 right-8 h-96 w-96 rounded-full bg-yellow-300/30 blur-3xl" />
+      <div className="absolute right-5 top-5 z-20">
+        <AccountChip />
+      </div>
 
       <PremiumHoverCard className="relative z-10 w-full max-w-2xl rounded-[2.5rem] p-8 text-center md:p-12">
         <motion.div
@@ -49,15 +54,9 @@ const Unauthorized = () => {
             </Link>
           )}
 
-          <Link
-            to="/"
-            className={isCustomer ? "premium-soft-button px-6 py-4" : "premium-primary-button px-6 py-4"}
-          >
-            <Home size={20} />
-            Go Home
-          </Link>
+          <PageNavigation />
 
-          {!isCustomer && (
+          {!user && (
             <Link to="/login" className="premium-soft-button px-6 py-4">
               Staff Login
             </Link>

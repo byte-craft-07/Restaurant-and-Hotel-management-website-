@@ -26,13 +26,13 @@ const orderSchema = new mongoose.Schema(
     tableRoom: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "TableRoom",
-      required: true,
+      default: null,
     },
 
     session: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "VerificationSession",
-      required: true,
+      default: null,
     },
 
     items: [orderItemSchema],

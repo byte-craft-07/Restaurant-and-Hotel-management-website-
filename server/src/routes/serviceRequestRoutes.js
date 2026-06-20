@@ -1,6 +1,7 @@
 const express = require("express");
 const {
   createServiceRequest,
+  getMyServiceRequests,
   getServiceRequests,
   updateServiceRequestStatus,
 } = require("../controllers/serviceRequestController");
@@ -9,6 +10,7 @@ const { protect, authorizeRoles } = require("../middlewares/authMiddleware");
 const router = express.Router();
 
 router.post("/", protect, createServiceRequest);
+router.get("/my", protect, getMyServiceRequests);
 
 router.get(
   "/",

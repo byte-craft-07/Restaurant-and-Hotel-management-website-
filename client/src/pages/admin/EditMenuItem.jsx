@@ -16,14 +16,8 @@ import {
   SegmentedControl,
   fieldClass,
 } from "../../components/form/PremiumFields";
-
-const getImageUrl = (image) => {
-  if (!image) return "";
-
-  return image.startsWith("/uploads")
-    ? `http://localhost:5000${image}`
-    : image;
-};
+import SkeletonBlock from "../../components/Skeleton";
+import { resolveMediaUrl } from "../../utils/mediaUrl";
 
 const EditMenuItem = () => {
   const { id } = useParams();
@@ -165,8 +159,24 @@ const EditMenuItem = () => {
 
   if (loading) {
     return (
-      <div className="premium-card p-10 text-center text-slate-500">
-        Loading menu item...
+      <div>
+        <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div className="space-y-4">
+            <SkeletonBlock className="h-10 w-40 rounded-full" />
+            <SkeletonBlock className="h-12 w-72" />
+            <SkeletonBlock className="h-5 w-80" />
+          </div>
+          <SkeletonBlock className="h-12 w-28" />
+        </div>
+        <div className="premium-card space-y-5 p-6">
+          <SkeletonBlock className="h-64 w-full rounded-[2rem]" />
+          <div className="grid gap-4 sm:grid-cols-2">
+            {Array.from({ length: 8 }, (_, index) => (
+              <SkeletonBlock key={index} className="h-14 w-full" />
+            ))}
+          </div>
+          <SkeletonBlock className="h-14 w-full" />
+        </div>
       </div>
     );
   }
@@ -230,7 +240,7 @@ const EditMenuItem = () => {
         {itemForm.image && (
           <div className="mb-5 h-56 overflow-hidden rounded-[2rem] bg-orange-50 md:h-72">
             <img
-              src={getImageUrl(itemForm.image)}
+              src={resolveMediaUrl(itemForm.image)}
               alt={itemForm.name}
               className="h-full w-full object-cover"
             />

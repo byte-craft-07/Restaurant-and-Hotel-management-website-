@@ -2,13 +2,24 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, Users } from "lucide-react";
 import api from "../../services/api";
+import { ListSkeleton } from "../../components/Skeleton";
 
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const fetchCustomers = async () => {
-    const res = await api.get("/users/customers");
-    setCustomers(res.data.customers || []);
+    try {
+      setLoading(true);
+      setError("");
+      const res = await api.get("/users/customers");
+      setCustomers(res.data.customers || []);
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || "Unable to load customers.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -28,6 +39,16 @@ const Customers = () => {
         </p>
       </div>
 
+      {error && (
+        <div className="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 font-bold text-red-600">
+          <span>{error}</span>
+          <button type="button" onClick={fetchCustomers} className="rounded-xl bg-white px-4 py-2">Retry</button>
+        </div>
+      )}
+
+      {loading ? (
+        <ListSkeleton count={5} />
+      ) : (
       <div className="overflow-x-auto rounded-[2rem] border border-white/80 bg-white/75 shadow-xl backdrop-blur-2xl">
         <table className="w-full min-w-[720px] text-left">
           <thead className="bg-orange-50 text-sm text-slate-600">
@@ -82,6 +103,7 @@ const Customers = () => {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 };

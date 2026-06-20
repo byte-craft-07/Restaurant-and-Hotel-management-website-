@@ -1,31 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Banknote, CreditCard, ReceiptText, UserRound } from "lucide-react";
+import { Banknote, CreditCard, ReceiptText, UserRound } from "lucide-react";
 import api from "../../services/api";
-import { DEMO_KITCHEN_ORDERS_KEY } from "../../services/demoExperience";
-
-const getLocalOrders = () => {
-  try {
-    return JSON.parse(localStorage.getItem(DEMO_KITCHEN_ORDERS_KEY) || "[]");
-  } catch {
-    return [];
-  }
-};
-
-const mergeOrders = (backendOrders, localOrders) => {
-  const orderMap = new Map();
-
-  [...backendOrders, ...localOrders].forEach((order) => {
-    if (order?._id) {
-      orderMap.set(order._id, order);
-    }
-  });
-
-  return Array.from(orderMap.values()).sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  );
-};
+import AccountChip from "../../components/AccountChip";
+import PageNavigation from "../../components/PageNavigation";
+import { ListSkeleton } from "../../components/Skeleton";
 
 const getOrderStatusLabel = (order) => {
   if (order.status === "payment_pending") return "Awaiting payment";
@@ -50,15 +30,19 @@ const getOrderStatusStyle = (order) => {
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const fetchOrders = async () => {
-    const localOrders = getLocalOrders();
-
     try {
+      setLoading(true);
+      setError("");
       const res = await api.get("/orders/my-orders");
-      setOrders(mergeOrders(res.data.orders || [], localOrders));
-    } catch {
-      setOrders(localOrders);
+      setOrders(res.data.orders || []);
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || "Unable to load your orders.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,13 +55,7 @@ const MyOrders = () => {
       <div className="relative z-10 mx-auto max-w-5xl">
         <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <Link
-              to="/menu"
-              className="premium-soft-button mb-4 px-4 py-2 text-sm"
-            >
-              <ArrowLeft size={18} />
-              Back to menu
-            </Link>
+            <PageNavigation backTo="/menu" className="mb-4" />
             <div className="premium-label-pill mb-4">
               <ReceiptText size={18} />
               Dining Timeline
@@ -88,12 +66,25 @@ const MyOrders = () => {
             </p>
           </div>
 
-          <Link to="/profile" className="premium-primary-button px-5 py-3">
-            <UserRound size={18} />
-            Profile
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <AccountChip />
+            <Link to="/profile" className="premium-primary-button px-5 py-3">
+              <UserRound size={18} />
+              Profile
+            </Link>
+          </div>
         </div>
 
+        {error && (
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 font-bold text-red-600">
+            <span>{error}</span>
+            <button type="button" onClick={fetchOrders} className="rounded-xl bg-white px-4 py-2">Retry</button>
+          </div>
+        )}
+
+        {loading ? (
+          <ListSkeleton count={4} />
+        ) : (
         <div className="space-y-5">
           {orders.map((order) => (
             <motion.div
@@ -105,7 +96,9 @@ const MyOrders = () => {
               <div className="flex justify-between gap-4">
                 <div>
                   <h2 className="text-2xl font-black text-slate-950">
-                    Room {order.tableRoom?.number}
+                    {order.tableRoom?.number
+                      ? `Room ${order.tableRoom.number}`
+                      : "Website order"}
                   </h2>
                   <p className="text-sm text-slate-500">
                     {new Date(order.createdAt).toLocaleString()}
@@ -175,6 +168,7 @@ const MyOrders = () => {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   );

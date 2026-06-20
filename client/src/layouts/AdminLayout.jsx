@@ -9,12 +9,15 @@ import {
   IndianRupee,
   ShoppingBag,
   BedDouble,
+  CalendarCheck2,
   Users,
   UserCog,
   Utensils,
 } from "lucide-react";
 import BrandLogo from "../components/BrandLogo";
 import { useAuth } from "../context/AuthContext";
+import AccountChip from "../components/AccountChip";
+import PageNavigation from "../components/PageNavigation";
 
 const AdminLayout = () => {
   const { logout, user } = useAuth();
@@ -34,6 +37,8 @@ const AdminLayout = () => {
     { to: "/admin/kitchen", label: "Kitchen", icon: ChefHat },
     { to: "/admin/menu", label: "Menu", icon: Utensils },
     { to: "/admin/tables", label: "Rooms", icon: BedDouble },
+    { to: "/admin/hotel-rooms", label: "Hotel Rooms", icon: BedDouble },
+    { to: "/admin/bookings", label: "Bookings", icon: CalendarCheck2 },
     { to: "/admin/customers", label: "Customers", icon: Users },
     { to: "/admin/staff", label: "Staff", icon: UserCog },
   ];
@@ -126,6 +131,10 @@ const AdminLayout = () => {
       </nav>
 
       <main className="relative z-10 flex-1 overflow-y-auto p-4 pb-28 md:p-6 md:pb-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <PageNavigation backTo="/admin" homeTo="/admin" />
+          <AccountChip />
+        </div>
         <Outlet />
       </main>
     </div>

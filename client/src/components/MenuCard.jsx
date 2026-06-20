@@ -7,6 +7,7 @@ import {
 } from "framer-motion";
 import { Plus, Sparkles } from "lucide-react";
 import { useCart } from "../context/CartContext";
+import { resolveMediaUrl } from "../utils/mediaUrl";
 
 const MenuCard = ({ item }) => {
   const { addToCart } = useCart();
@@ -33,9 +34,7 @@ const MenuCard = ({ item }) => {
   const glowY = useTransform(cardY, (value) => `${value * 100}%`);
   const glow = useMotionTemplate`radial-gradient(circle at ${glowX} ${glowY}, rgba(251, 146, 60, 0.32), rgba(253, 186, 116, 0.10) 32%, transparent 58%)`;
 
-  const imageSrc = item.image?.startsWith("/uploads")
-    ? `http://localhost:5000${item.image}`
-    : item.image;
+  const imageSrc = resolveMediaUrl(item.image);
   const isVegan = item.isVegan || item.tags?.includes("vegan");
   const dietaryBadge = isVegan ? "Vegan" : item.isVeg ? "Veg" : "Non-Veg";
   const dietaryClass = isVegan

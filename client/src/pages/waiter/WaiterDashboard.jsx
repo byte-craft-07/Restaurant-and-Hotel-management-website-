@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   BellRing,
   CheckCircle,
-  Home,
   ReceiptText,
   Sparkles,
   XCircle,
 } from "lucide-react";
 import socket from "../../services/socket";
 import api from "../../services/api";
+import AccountChip from "../../components/AccountChip";
+import PageNavigation from "../../components/PageNavigation";
 
 const WaiterDashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -121,13 +121,10 @@ const WaiterDashboard = () => {
               Live room orders and hotel service operations.
             </p>
           </div>
-          <Link
-            to="/"
-            className="inline-flex w-fit items-center gap-2 rounded-2xl border border-orange-100 bg-white/85 px-5 py-3 font-black text-orange-600 shadow-lg shadow-orange-100/60 transition hover:border-orange-200 hover:bg-orange-50"
-          >
-            <Home size={18} />
-            Home Page
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <AccountChip />
+            <PageNavigation backTo="/waiter/orders" />
+          </div>
         </div>
 
         <section className="premium-card mb-8 p-6">

@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "seed:admin": "node src/seeders/admin.seed.js"
+    "seed:admin": "node src/seeders/admin.seed.js",
+    "seed:menu": "node src/seeders/menu.seed.js"
   },
   "engines": {
     "node": "20.x"

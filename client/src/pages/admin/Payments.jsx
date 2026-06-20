@@ -2,21 +2,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Banknote, CheckCircle, ReceiptText, Search } from "lucide-react";
 import api from "../../services/api";
-import { DEMO_KITCHEN_ORDERS_KEY } from "../../services/demoExperience";
 
 const normalizeCashCode = (value = "") => {
   const code = value.trim().toUpperCase();
 
   if (!code) return "";
   return code.startsWith("CASH-") ? code : `CASH-${code}`;
-};
-
-const getDemoOrders = () => {
-  try {
-    return JSON.parse(localStorage.getItem(DEMO_KITCHEN_ORDERS_KEY) || "[]");
-  } catch {
-    return [];
-  }
 };
 
 const Payments = () => {
@@ -44,16 +35,6 @@ const Payments = () => {
       const res = await api.get(`/orders/cash-code/${normalizedCode}`);
       setOrder(res.data.order);
     } catch (err) {
-      const demoOrder = getDemoOrders().find(
-        (item) => normalizeCashCode(item.cashCode) === normalizedCode
-      );
-
-      if (demoOrder) {
-        setOrder({ ...demoOrder, isDemoOrder: true });
-        setMessage("Demo/local bill loaded.");
-        return;
-      }
-
       setError(err.response?.data?.message || "Unable to find this bill.");
     } finally {
       setLoading(false);
@@ -62,31 +43,6 @@ const Payments = () => {
 
   const markPaid = async () => {
     if (!order?.cashCode) return;
-
-    if (order.isDemoOrder) {
-      const updatedOrder = {
-        ...order,
-        paymentStatus: "paid",
-        status: order.status === "payment_pending" ? "pending" : order.status,
-        paidAt: new Date().toISOString(),
-      };
-
-      const updatedOrders = getDemoOrders().map((item) =>
-        item._id === order._id ? updatedOrder : item
-      );
-
-      localStorage.setItem(
-        DEMO_KITCHEN_ORDERS_KEY,
-        JSON.stringify(updatedOrders)
-      );
-      window.dispatchEvent(
-        new CustomEvent("demo_payment_updated", { detail: updatedOrder })
-      );
-      setOrder(updatedOrder);
-      setMessage("Demo/local payment complete. Order confirmed.");
-      setError("");
-      return;
-    }
 
     try {
       setLoading(true);

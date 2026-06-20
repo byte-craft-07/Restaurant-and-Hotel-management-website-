@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowLeft,
   BadgePercent,
+  CalendarCheck2,
   Mail,
   Phone,
   ReceiptText,
+  Sparkles,
   User,
 } from "lucide-react";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import AccountChip from "../../components/AccountChip";
+import PageNavigation from "../../components/PageNavigation";
 
 const CustomerProfile = () => {
   const { user } = useAuth();
@@ -29,18 +32,7 @@ const CustomerProfile = () => {
       <div className="relative z-10 mx-auto max-w-4xl">
         <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <Link
-              to="/menu"
-              className="premium-soft-button mb-4 px-4 py-2 text-sm"
-            >
-              <ArrowLeft size={18} />
-              Back to menu
-            </Link>
-
-            <div className="premium-label-pill mb-4">
-              <User size={18} />
-              Guest Profile
-            </div>
+            <PageNavigation backTo="/menu" className="mb-4" />
 
             <h1 className="text-4xl font-black text-slate-950">My Profile</h1>
             <p className="mt-2 text-slate-500">
@@ -48,10 +40,21 @@ const CustomerProfile = () => {
             </p>
           </div>
 
-          <Link to="/my-orders" className="premium-primary-button px-5 py-3">
-            <ReceiptText size={18} />
-            My Orders
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <AccountChip />
+            <Link to="/bookings" className="premium-soft-button px-5 py-3">
+              <CalendarCheck2 size={18} />
+              My Bookings
+            </Link>
+            <Link to="/my-orders" className="premium-primary-button px-5 py-3">
+              <ReceiptText size={18} />
+              My Orders
+            </Link>
+            <Link to="/hotel-services" className="premium-soft-button px-5 py-3">
+              <Sparkles size={18} />
+              Hotel Services
+            </Link>
+          </div>
         </div>
 
         <div className="premium-card mb-6 p-6">

@@ -1,39 +1,106 @@
 const ServiceRequest = require("../models/ServiceRequest");
 const TableRoom = require("../models/TableRoom");
+const HotelRoom = require("../models/HotelRoom");
+const RoomBooking = require("../models/RoomBooking");
 
 const populateRequest = (query) =>
   query
     .populate("tableRoom", "type number label")
+    .populate("hotelRoom", "roomNumber type status")
+    .populate("roomBooking", "guestName checkInDate checkOutDate status")
     .populate("customer", "name phone email customerId");
 
 const createServiceRequest = async (req, res) => {
   try {
-    const { qrToken, type = "waiter", note = "" } = req.body;
+    const {
+      qrToken,
+      roomBookingId,
+      hotelRoomId,
+      type = "waiter",
+      note = "",
+      estimatedAmount = 0,
+    } = req.body;
 
-    if (!qrToken) {
+    if (!qrToken && !roomBookingId && !hotelRoomId) {
       return res.status(400).json({
         success: false,
-        message: "Please scan your room QR first.",
+        message: "Please select a room booking or scan your room QR first.",
       });
     }
 
-    const tableRoom = await TableRoom.findOne({
-      qrToken,
-      isActive: true,
-    });
+    let tableRoom = null;
+    let hotelRoom = null;
+    let roomBooking = null;
 
-    if (!tableRoom) {
-      return res.status(404).json({
-        success: false,
-        message: "Invalid or inactive QR code",
+    if (qrToken) {
+      tableRoom = await TableRoom.findOne({
+        qrToken,
+        isActive: true,
       });
+
+      if (!tableRoom) {
+        return res.status(404).json({
+          success: false,
+          message: "Invalid or inactive QR code",
+        });
+      }
+    }
+
+    if (roomBookingId) {
+      roomBooking = await RoomBooking.findById(roomBookingId);
+
+      if (!roomBooking) {
+        return res.status(404).json({
+          success: false,
+          message: "Room booking not found",
+        });
+      }
+
+      if (
+        req.user.role !== "admin" &&
+        String(roomBooking.customer) !== String(req.user._id)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "Not allowed to request service for this booking",
+        });
+      }
+
+      hotelRoom = roomBooking.room;
+    } else if (hotelRoomId) {
+      hotelRoom = await HotelRoom.findById(hotelRoomId);
+
+      if (!hotelRoom) {
+        return res.status(404).json({
+          success: false,
+          message: "Hotel room not found",
+        });
+      }
+
+      if (req.user.role !== "admin") {
+        roomBooking = await RoomBooking.findOne({
+          room: hotelRoom._id,
+          customer: req.user._id,
+          status: { $in: ["confirmed", "checked-in"] },
+        });
+
+        if (!roomBooking) {
+          return res.status(403).json({
+            success: false,
+            message: "An active booking is required for this room service request",
+          });
+        }
+      }
     }
 
     const serviceRequest = await ServiceRequest.create({
-      tableRoom: tableRoom._id,
+      tableRoom: tableRoom?._id || null,
+      hotelRoom: hotelRoom?._id || hotelRoom || null,
+      roomBooking: roomBooking?._id || null,
       customer: req.user?._id || null,
       type,
       note,
+      estimatedAmount: Number(estimatedAmount) || 0,
     });
 
     const fullRequest = await populateRequest(
@@ -49,6 +116,25 @@ const createServiceRequest = async (req, res) => {
       success: true,
       message: "Service request sent to staff.",
       serviceRequest: fullRequest,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const getMyServiceRequests = async (req, res) => {
+  try {
+    const serviceRequests = await populateRequest(
+      ServiceRequest.find({ customer: req.user._id }).sort({ createdAt: -1 })
+    );
+
+    res.json({
+      success: true,
+      count: serviceRequests.length,
+      serviceRequests,
     });
   } catch (error) {
     res.status(500).json({
@@ -129,6 +215,7 @@ const updateServiceRequestStatus = async (req, res) => {
 
 module.exports = {
   createServiceRequest,
+  getMyServiceRequests,
   getServiceRequests,
   updateServiceRequestStatus,
 };
