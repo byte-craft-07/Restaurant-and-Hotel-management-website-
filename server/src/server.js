@@ -13,6 +13,8 @@ const allowedOrigins = parseOrigins(
   process.env.FRONTEND_URL,
   process.env.RENDER_EXTERNAL_URL,
   process.env.CORS_ORIGINS,
+  "https://restaurant-and-hotel-management-web.vercel.app",
+  "https://restaurant-and-hotel-management-website-byte-craft.vercel.app",
   "http://localhost:5173"
 );
 
@@ -22,7 +24,13 @@ const isAllowedOrigin = (origin = "") => {
 
   try {
     const { hostname } = new URL(origin);
-    return hostname === "localhost" || hostname.endsWith(".onrender.com");
+    return (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname.endsWith(".onrender.com") ||
+      (hostname.startsWith("restaurant-and-hotel-management-") &&
+        hostname.endsWith("-byte-craft.vercel.app"))
+    );
   } catch {
     return false;
   }
